@@ -64,12 +64,6 @@ export const WalletConnect = (props) => {
       .catch((err) => {
         console.log('ERR:', err)
       })
-      .then(async function (swap) {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0xA4B1' }], // chainId must be in hexadecimal numbers
-        });
-      })
 
     if (instance === undefined) {
       return
