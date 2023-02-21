@@ -1644,7 +1644,6 @@
         "decimals": 18,
         "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
     },
-
     {
         "chainId": 42161,
         "address": "0x1e3c6c53F9f60BF8aAe0D7774C21Fa6b1afddC57",
@@ -1698,15 +1697,6 @@
         "address": "0x9d2F299715D94d8A7E6F5eaa8E654E8c74a988A7",
         "name": "Frax Share",
         "symbol": "FXS",
-        "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
-    },
-
-    {
-        "chainId": 42161,
-        "address": "0x32Eb7902D4134bf98A28b963D26de779AF92A212",
-        "name": "DPX",
-        "symbol": "DPX",
         "decimals": 18,
         "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
     },
