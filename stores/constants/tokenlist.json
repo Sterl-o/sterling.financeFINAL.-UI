@@ -1634,19 +1634,7 @@
         "address": "0x4f947b40BEEB9D8130437781a560E5c7D089730f",
         "name": "KAKI USDC",
         "symbol": "kUSDC",
-        "decimals": 18,
-        "extensions": {
-            "bridgeInfo": {
-                "1": {
-                    "tokenAddress": "0xa124ff1e97e7f3e4a796f6a2d3bf5d0e2d41973d",
-                    "originBridgeAddress": "0x09e9222E96E7B4AE2a407B98d48e330053351EEe",
-                    "destBridgeAddress": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec"
-                }
-            },
-            "l1Address": "0xa124ff1e97e7f3e4a796f6a2d3bf5d0e2d41973d",
-            "l2GatewayAddress": "0x09e9222E96E7B4AE2a407B98d48e330053351EEe",
-            "l1GatewayAddress": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec"
-        }
+        "decimals": 18
     },
     {
         "chainId": 42161,
@@ -1654,18 +1642,112 @@
         "name": "Synth sUSD",
         "symbol": "sUSD",
         "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png",
-        "extensions": {
-            "bridgeInfo": {
-                "1": {
-                    "tokenAddress": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
-                    "originBridgeAddress": "0x09e9222E96E7B4AE2a407B98d48e330053351EEe",
-                    "destBridgeAddress": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec"
-                }
-            },
-            "l1Address": "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
-            "l2GatewayAddress": "0x09e9222E96E7B4AE2a407B98d48e330053351EEe",
-            "l1GatewayAddress": "0xa3a7b6f88361f48403514059f1f16c8e78d60eec"
-        }
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+
+    {
+        "chainId": 42161,
+        "address": "0x1e3c6c53F9f60BF8aAe0D7774C21Fa6b1afddC57",
+        "name": "xSHRAP",
+        "symbol": "xSHRAP",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x74ccbe53F77b08632ce0CB91D3A545bF6B8E0979",
+        "name": "Fantom BOMB",
+        "symbol": "fBOMB",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a",
+        "name": "GMX",
+        "symbol": "GMX",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x2CaB3abfC1670D1a452dF502e216a66883cDf079",
+        "name": "L2DAO",
+        "symbol": "L2DAO",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0xFEa7a6a0B346362BF88A9e4A88416B77a57D6c2A",
+        "name": "Magic Internet Money",
+        "symbol": "MIM",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F",
+        "name": "Frax",
+        "symbol": "FRAX",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x9d2F299715D94d8A7E6F5eaa8E654E8c74a988A7",
+        "name": "Frax Share",
+        "symbol": "FXS",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+
+    {
+        "chainId": 42161,
+        "address": "0x32Eb7902D4134bf98A28b963D26de779AF92A212",
+        "name": "DPX",
+        "symbol": "DPX",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x51318B7D00db7ACc4026C88c3952B66278B6A67F",
+        "name": "PLS",
+        "symbol": "PLS",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x10393c20975cF177a3513071bC110f7962CD67da",
+        "name": "Jones DAO",
+        "symbol": "JONES",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x13Ad51ed4F1B7e9Dc168d8a00cB3f4dDD85EfA60",
+        "name": "Lido",
+        "symbol": "LIDO",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x178412e79c25968a32e89b11f63B33F733770c2A",
+        "name": "Frax Ether",
+        "symbol": "frxETH",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x3F56e0c36d275367b8C502090EDF38289b3dEa0d",
+        "name": "miMATIC",
+        "symbol": "MAI",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
     }
 ]
