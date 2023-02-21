@@ -61,6 +61,12 @@ export const WalletConnect = (props) => {
 
 
     const instance = await web3modal.connect()
+      .then(async function (swap) {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0xA4B1' }], // chainId must be in hexadecimal numbers
+        });
+      })
       .catch((err) => {
         console.log('ERR:', err)
       })
