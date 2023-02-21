@@ -1682,7 +1682,7 @@
         "name": "Magic Internet Money",
         "symbol": "MIM",
         "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/162.png"
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/200x200/162.png"
     },
     {
         "chainId": 42161,
@@ -1690,7 +1690,7 @@
         "name": "Frax",
         "symbol": "FRAX",
         "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+        "logoURI": "https://www.liblogo.com/img-logo/fr2701ff23-frax-share-logo-frax-price-today-official-live-frax-price-chart-in-usd.png"
     },
     {
         "chainId": 42161,
@@ -1698,7 +1698,7 @@
         "name": "Frax Share",
         "symbol": "FXS",
         "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/200x200/6953.png"
     },
     {
         "chainId": 42161,
@@ -1722,7 +1722,7 @@
         "name": "Lido",
         "symbol": "LIDO",
         "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+        "logoURI": "https://thegivingblock.com/wp-content/uploads/2022/04/Lido-LDO-logo.png"
     },
     {
         "chainId": 42161,
@@ -1738,6 +1738,14 @@
         "name": "miMATIC",
         "symbol": "MAI",
         "decimals": 18,
-        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/2927.png"
+        "logoURI": "https://i.ibb.co/sjYGbvF/mimatic-red-1.webp"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x32Eb7902D4134bf98A28b963D26de779AF92A212",
+        "name": "DPX",
+        "symbol": "DPX",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/QYk22KX/11188.png"
     }
 ]
