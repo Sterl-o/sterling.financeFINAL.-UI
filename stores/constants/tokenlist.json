@@ -1747,5 +1747,13 @@
         "symbol": "DPX",
         "decimals": 18,
         "logoURI": "https://i.ibb.co/QYk22KX/11188.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x5979D7b546E38E414F7E9822514be443A4800529",
+        "name": "wstETH",
+        "symbol": "wstETH",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/ZNgnPwj/12409.png"
     }
 ]
