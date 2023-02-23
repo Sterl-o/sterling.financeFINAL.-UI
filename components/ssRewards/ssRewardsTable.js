@@ -180,7 +180,7 @@ function EnhancedTableHead(props) {
         }}
       >
         {headCells.map((headCell) => (
-          <>
+          <React.Fragment key={headCell.id}>
             {headCell.isSticky ? (
               <StickyTableCell
                 appTheme={appTheme}
@@ -260,7 +260,7 @@ function EnhancedTableHead(props) {
                 </TableSortLabel>
               </StyledTableCell>
             )}
-          </>
+          </React.Fragment>
         ))}
       </TableRow>
     </TableHead>
@@ -637,6 +637,7 @@ export default function EnhancedTable({ rewards, tokenID }) {
   ) {
     return (
       <div
+        key={`${data1}-${symbol1}_${data2}-${symbol2}`}
         style={{
           display: "flex",
           justifyContent: "flex-end",

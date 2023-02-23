@@ -105,6 +105,7 @@ class Store {
 
   subscribeProvider = () => {
     const that = this;
+    if (!window.ethereum) return
 
     window.ethereum.on("accountsChanged", async function (accounts) {
       const address = accounts[0];
