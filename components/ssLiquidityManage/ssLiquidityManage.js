@@ -805,12 +805,12 @@ export default function ssLiquidityManage() {
       const p = createLP
         ? await stores.stableSwapStore.getPair(
             value.address,
-            asset1.address,
+            asset1?.address,
             stable
           )
         : await stores.stableSwapStore.getPair(
-            value.token0.address,
-            value.token1.address,
+            value.token0?.address,
+            value.token1?.address,
             value.isStable
           );
       await checkIsWhiteListedPair(p);
@@ -830,15 +830,15 @@ export default function ssLiquidityManage() {
       setWithdrawAsset(value);
       setAsset0(value);
       const p = await stores.stableSwapStore.getPair(
-        value.token0.address,
-        value.token1.address,
+        value.token0?.address,
+        value.token1?.address,
         value.isStable
       );
       setPair(p);
     } else if (type === "amount1") {
       setAsset1(value);
       const p = await stores.stableSwapStore.getPair(
-        asset0.address,
+        asset0?.address,
         value.address,
         stable
       );
@@ -858,8 +858,8 @@ export default function ssLiquidityManage() {
     } else if (type === "withdraw") {
       setWithdrawAsset(value);
       const p = await stores.stableSwapStore.getPair(
-        value.token0.address,
-        value.token1.address,
+        value.token0?.address,
+        value.token1?.address,
         value.isStable
       );
       setPair(p);
