@@ -7,40 +7,41 @@ require('url')
 
 export function getSwapContract(signer) {
     return new ethers.Contract(
-        multiSwapAddress,
-        MULTISWAP_ABI,
-        signer
+      multiSwapAddress,
+      MULTISWAP_ABI,
+      signer
     );
 }
 
 export async function allowance(tokenAddress, provider, swapAmount, decimals, router = multiSwapAddress) {
     // console.log('swapAmount', swapAmount, decimals)
+    const isSwapAmountUndefinedOrNullOrZero = swapAmount === undefined || swapAmount === null || swapAmount === '0'
     let contract = new ethers.Contract(
-        tokenAddress,
-        ERC20_ABI,
-        provider
+      tokenAddress,
+      ERC20_ABI,
+      provider
     );
     const signer = provider.getSigner()
     const address = await signer.getAddress();
     const res = await contract.callStatic.allowance(address, router);
-    return res && BigNumber(res.toString()).gte(parseUnits(swapAmount ?? '0', decimals ?? '0').toString())
+    return res && BigNumber(res.toString()).gte(parseUnits((swapAmount && isSwapAmountUndefinedOrNullOrZero) ? swapAmount : '0', decimals ?? '0').toString())
 }
 
 
 export async function approve(tokenAddress, provider, router = multiSwapAddress, gasPrice, gasPricePriority) {
     const amount = ethers.constants.MaxUint256;
     const tokenContract = new ethers.Contract(
-        tokenAddress,
-        ERC20_ABI,
-        provider
+      tokenAddress,
+      ERC20_ABI,
+      provider
     );
     const tx = await tokenContract
-        .connect(provider.getSigner())
-        .approve(router, amount, { gasLimit: 100000,
-            maxPriorityFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
-            maxFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
-            // gasPrice,
-        });
+      .connect(provider.getSigner())
+      .approve(router, amount, { gasLimit: 100000,
+          maxPriorityFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
+          maxFeePerGas: web3.utils.toWei("2", "gwei"),
+          // gasPrice,    
+      });
 
     return tx
 }
@@ -59,35 +60,35 @@ export async function doSwap(swap, slippage, provider, emitter, gasPrice, gasPri
         const swapNative = swap.swapData.tokenIn === ZERO_ADDRESS;
         // call static check for swap error catching
         await getSwapContract()
-            .connect(provider.getSigner())
-            .callStatic
-            .multiSwap(
-                swap.swapData, // in/out tokens, amounts
-                swap.swaps, // array of swaps
-                swap.tokenAddresses, // array of inter token addresses
-                getSlippage(slippage),
-                getDeadline(),
-                { gasLimit: 3000000, value: swapNative ? swap.swapData.swapAmount : 0,
-                    maxPriorityFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
-                    maxFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
-                    // gasPrice,
-                }
-            )
+          .connect(provider.getSigner())
+          .callStatic
+          .multiSwap(
+            swap.swapData, // in/out tokens, amounts
+            swap.swaps, // array of swaps
+            swap.tokenAddresses, // array of inter token addresses
+            getSlippage(slippage),
+            getDeadline(),
+            { gasLimit: 3000000, value: swapNative ? swap.swapData.swapAmount : 0,
+                maxPriorityFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
+                maxFeePerGas: web3.utils.toWei("2", "gwei"),
+                // gasPrice,
+            }
+          )
 
         const tx = await getSwapContract()
-            .connect(provider.getSigner())
-            .multiSwap(
-                swap.swapData, // in/out tokens, amounts
-                swap.swaps, // array of swaps
-                swap.tokenAddresses, // array of inter token addresses
-                getSlippage(slippage),
-                getDeadline(),
-                { gasLimit: 3000000, value: swapNative ? swap.swapData.swapAmount : 0,
-                    maxPriorityFeePerGas: gasPrice,
-                    maxFeePerGas: gasPricePriority,
-                    // gasPrice,
-                }
-            );
+          .connect(provider.getSigner())
+          .multiSwap(
+            swap.swapData, // in/out tokens, amounts
+            swap.swaps, // array of swaps
+            swap.tokenAddresses, // array of inter token addresses
+            getSlippage(slippage),
+            getDeadline(),
+            { gasLimit: 3000000, value: swapNative ? swap.swapData.swapAmount : 0,
+                maxPriorityFeePerGas: gasPrice,
+                maxFeePerGas: gasPricePriority,
+                // gasPrice,
+            }
+          );
 
         // console.log('multiswap-helper doSwap done, tx:', tx)
 

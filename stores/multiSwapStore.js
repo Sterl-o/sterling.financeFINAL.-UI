@@ -1,7 +1,7 @@
-import { makeAutoObservable, action } from 'mobx'
-import { allowance, approve, doSwap, getSwapContract, swapQuery, api } from "./helpers/multiswap-helper";
+import {makeAutoObservable, action} from 'mobx'
+import {allowance, approve, doSwap, getSwapContract, swapQuery, api} from "./helpers/multiswap-helper";
 import * as ethers from 'ethers'
-import { debounce } from "debounce"
+import {debounce} from "debounce"
 import stores from "./";
 import {
     FTM_SYMBOL,
@@ -14,7 +14,7 @@ import {
     FTM_DECIMALS
 } from "./constants/contracts";
 import {DIRECT_SWAP_ROUTES, GAS_MULTIPLIER, MAX_UINT256, MULTISWAP_INCLUDE, ZERO_ADDRESS} from "./constants";
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 import {formatCurrency, getTXUUID} from "../utils";
 import {
     emitNewNotifications, emitNotificationConfirmed,
@@ -125,7 +125,7 @@ class MultiSwapStore {
     }
 
     reverseTokens() {
-        const { tokenOut, tokenIn } = this
+        const {tokenOut, tokenIn} = this
         if (this.isWrapUnwrap) {
             this.swap = null
             this.error = null
@@ -223,7 +223,7 @@ class MultiSwapStore {
                     {
                         uuid: swapTXID,
                         description: `Swap ${formatCurrency(fromAmount)} ${
-                            fromAsset.symbol
+                          fromAsset.symbol
                         } for ${toAsset.symbol}`,
                         status: "WAITING",
                     },
@@ -257,8 +257,7 @@ class MultiSwapStore {
                 }
 
                 emitNotificationPending(emitter, swapTXID)
-                const gasPrice = await stores.accountStore.getGasPrice()
-                const res = await doSwap(this.swap, this.slippage, this.provider, this.emitter, web3.utils.toWei(gasPrice, "gwei"), web3.utils.toWei(gasPrice, "gwei"))
+                const res = await doSwap(this.swap, this.slippage, this.provider, this.emitter, web3.utils.toWei(await stores.accountStore.getGasPrice(), "gwei"), web3.utils.toWei("2", "gwei"))
                 // const res = await doSwap(this.swap, this.slippage, this.provider, this.emitter, web3.utils.toWei(BigNumber(await stores.accountStore.getGasPrice()).times(GAS_MULTIPLIER).toFixed(0), "gwei"))
                 console.log("GASSSS2", web3.utils.toWei(BigNumber(await stores.accountStore.getGasPrice()).times(GAS_MULTIPLIER).toFixed(0), "gwei"), (await stores.accountStore.getGasPrice()).toString())
                 emitNotificationSubmitted(emitter, swapTXID, res?.hash)
@@ -276,16 +275,16 @@ class MultiSwapStore {
                 this.isFetchingSwap = false
             }
         }
-        if(this.swapQueryTimeout) {
+        if (this.swapQueryTimeout) {
             clearInterval(this.swapQueryTimeout);
         }
         this.swapQueryTimeout = null;
     }
 
     parseError(err) {
-        if(err?.message?.indexOf('MSAmountOutLessThanRequired') !== -1) {
+        if (err?.message?.indexOf('MSAmountOutLessThanRequired') !== -1) {
             return "Returned amount less than expected. Increase slippage."
-        }  else if(err?.message?.indexOf('User denied transaction signature') !== -1) {
+        } else if (err?.message?.indexOf('User denied transaction signature') !== -1) {
             return null
         } else {
             return 'Swap request error'
@@ -312,7 +311,7 @@ class MultiSwapStore {
             const erc20 = new ethers.Contract(address, ERC20_ABI, this.provider)
             const decimals = await erc20.decimals()
             const symbol = await erc20.symbol()
-            const token = { address, decimals, symbol }
+            const token = {address, decimals, symbol}
             this.tokensMap[address] = token
         }
         return this.tokensMap[address]
@@ -332,12 +331,12 @@ class MultiSwapStore {
 
     get isWrapUnwrap() {
         return (this.tokenIn === FTM_SYMBOL && ''.concat(this.tokenOut).toLowerCase() === WFTM_ADDRESS.toLowerCase())
-            || (''.concat(this.tokenIn).toLowerCase() === WFTM_ADDRESS.toLowerCase() && this.tokenOut === FTM_SYMBOL)
+          || (''.concat(this.tokenIn).toLowerCase() === WFTM_ADDRESS.toLowerCase() && this.tokenOut === FTM_SYMBOL)
     }
 
     get isDirectRoute() {
         return (!!DIRECT_SWAP_ROUTES[this.tokenIn?.toLowerCase()] && DIRECT_SWAP_ROUTES[this.tokenIn?.toLowerCase()] === this.tokenOut?.toLowerCase())
-            || (!!DIRECT_SWAP_ROUTES[this.tokenOut?.toLowerCase()] && DIRECT_SWAP_ROUTES[this.tokenOut?.toLowerCase()] === this.tokenIn?.toLowerCase())
+          || (!!DIRECT_SWAP_ROUTES[this.tokenOut?.toLowerCase()] && DIRECT_SWAP_ROUTES[this.tokenOut?.toLowerCase()] === this.tokenIn?.toLowerCase())
     }
 
     get isMultiswapInclude() {
@@ -456,7 +455,7 @@ class MultiSwapStore {
     async _fetchData() {
         const requests = [api('info'), api('dexes'), api('tokens')];
         const [service, dexes, tokens] = await Promise.all(requests);
-        this.data = { service, dexes, tokens }
+        this.data = {service, dexes, tokens}
     }
 
     get routes() {
@@ -466,39 +465,45 @@ class MultiSwapStore {
             return address
         }
 
+
         if (this.swap === null) {
             return null
         } else {
-            return this.swap.swaps?.map((s) => {
-                let percentage = null;
+            try {
 
-                if (parseFloat(s.amount) > 0) {
-                    percentage = ethers.BigNumber.from(s.amount)
-                        .mul(100)
-                        .div(this.swap.swapAmount)
-                        .toString();
-                }
+                return this.swap.swaps?.map((s) => {
+                    let percentage = null;
 
-                const tokenIn = tokenByIndex(this.swap, s.assetInIndex);
-                const tokenOut = tokenByIndex(this.swap, s.assetOutIndex);
-                const dex = {
-                    name: this.swap.swapPlatforms ? this.swap.swapPlatforms[s.poolId] : 'Sterling',
-                };
+                    if (parseFloat(s.amount) > 0) {
+                        percentage = ethers.BigNumber.from(s.amount)
+                          .mul(100)
+                          .div(this.swap.swapAmount)
+                          .toString();
 
-                return {
-                    percentage,
-                    tokenIn,
-                    tokenOut,
-                    dex
-                }
-            })?.reduce((acc, item) => {
-                if (item.percentage !== null) {
-                    acc.push([item])
-                } else {
-                    acc[acc.length - 1].push(item)
-                }
-                return acc
-            }, []) ?? []
+                    }
+                    const tokenIn = tokenByIndex(this.swap, s.assetInIndex);
+                    const tokenOut = tokenByIndex(this.swap, s.assetOutIndex);
+                    const dex = {
+                        name: this.swap.swapPlatforms ? this.swap.swapPlatforms[s.poolId] : 'Sterling',
+                    };
+
+                    return {
+                        percentage,
+                        tokenIn,
+                        tokenOut,
+                        dex
+                    }
+                })?.reduce((acc, item) => {
+                    if (item.percentage !== null) {
+                        acc.push([item])
+                    } else {
+                        acc[acc.length - 1].push(item)
+                    }
+                    return acc
+                }, []) ?? []
+            } catch (e) {
+                return []
+            }
         }
     }
 
