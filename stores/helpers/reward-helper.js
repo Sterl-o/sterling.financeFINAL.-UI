@@ -211,17 +211,17 @@ export const getRewardBalances = async (
 
     const result = [];
 
-    // VE DIST
-    const veDist = await getVeDistRewards(
-      web3,
-      tokenID,
-      vestNFTs,
-      govToken,
-      veToken
-    );
-    if (veDist && veDist.length > 0) {
-      result.push(...veDist);
-    }
+    // // VE DIST
+    // const veDist = await getVeDistRewards(
+    //   web3,
+    //   tokenID,
+    //   vestNFTs,
+    //   govToken,
+    //   veToken
+    // );
+    // if (veDist && veDist.length > 0) {
+    //   result.push(...veDist);
+    // }
 
     // GAUGE REWARDS
     const gauges = await collectGaugeRewards(
