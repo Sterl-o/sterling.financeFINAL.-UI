@@ -257,7 +257,8 @@ class MultiSwapStore {
                 }
 
                 emitNotificationPending(emitter, swapTXID)
-                const res = await doSwap(this.swap, this.slippage, this.provider, this.emitter, web3.utils.toWei(await stores.accountStore.getGasPrice(), "gwei"), web3.utils.toWei("2", "gwei"))
+                const gasPrice = await stores.accountStore.getGasPrice()
+                const res = await doSwap(this.swap, this.slippage, this.provider, this.emitter, web3.utils.toWei(gasPrice, "gwei"), web3.utils.toWei(gasPrice, "gwei"))
                 // const res = await doSwap(this.swap, this.slippage, this.provider, this.emitter, web3.utils.toWei(BigNumber(await stores.accountStore.getGasPrice()).times(GAS_MULTIPLIER).toFixed(0), "gwei"))
                 console.log("GASSSS2", web3.utils.toWei(BigNumber(await stores.accountStore.getGasPrice()).times(GAS_MULTIPLIER).toFixed(0), "gwei"), (await stores.accountStore.getGasPrice()).toString())
                 emitNotificationSubmitted(emitter, swapTXID, res?.hash)
