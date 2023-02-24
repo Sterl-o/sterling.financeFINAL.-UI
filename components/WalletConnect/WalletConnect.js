@@ -16,8 +16,8 @@ const {
   CONFIGURE_SS,
 } = ACTIONS;
 
-const ArbitrumRPC = 'https://endpoints.omniatech.io/v1/arbitrum/one/public'
-// const ArbitrumRPC = 'https://frosty-dark-general.arbitrum-mainnet.quiknode.pro/'
+// const ArbitrumRPC = 'https://endpoints.omniatech.io/v1/arbitrum/one/public'
+const ArbitrumRPC = 'https://frosty-dark-general.arbitrum-mainnet.quiknode.pro/'
 
 export const WalletConnect = (props) => {
   const {appTheme} = useAppThemeContext();
