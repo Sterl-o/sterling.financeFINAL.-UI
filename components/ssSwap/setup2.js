@@ -210,7 +210,7 @@ function Setup() {
 
                     if (toIndex === undefined) {
                         toIndex = baseAsset.findIndex((token) => {
-                            return token.id.toLowerCase() === DEFAULT_ASSET_TO.toLowerCase();
+                            return token.id?.toLowerCase() === DEFAULT_ASSET_TO.toLowerCase();
                         });
                     }
 
@@ -222,7 +222,7 @@ function Setup() {
 
                     if (router.query.from) {
                         const index = baseAsset.findIndex((token) => {
-                            return token.id.toLowerCase() === router.query.from.toLowerCase();
+                            return token.id?.toLowerCase() === router.query.from.toLowerCase();
                         });
                         if (index !== -1) {
                             fromIndex = index
@@ -231,7 +231,7 @@ function Setup() {
 
                     if (fromIndex === undefined) {
                         fromIndex = baseAsset.findIndex((token) => {
-                            return token.id.toLowerCase() === DEFAULT_ASSET_FROM.toLowerCase();
+                            return token.id?.toLowerCase() === DEFAULT_ASSET_FROM.toLowerCase();
                         });
                     }
 
