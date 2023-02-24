@@ -16,7 +16,7 @@ const {
   CONFIGURE_SS,
 } = ACTIONS;
 
-const ArbitrumRPC = 'https://arb1.arbitrum.io/rpc'
+const ArbitrumRPC = 'https://endpoints.omniatech.io/v1/arbitrum/one/public'
 
 export const WalletConnect = (props) => {
   const {appTheme} = useAppThemeContext();
