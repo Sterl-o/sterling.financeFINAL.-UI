@@ -16,6 +16,8 @@ const {
   CONFIGURE_SS,
 } = ACTIONS;
 
+const ArbitrumRPC = 'https://endpoints.omniatech.io/v1/arbitrum/one/public'
+
 export const WalletConnect = (props) => {
   const {appTheme} = useAppThemeContext();
 
@@ -39,7 +41,7 @@ export const WalletConnect = (props) => {
             appName: 'Sterling app',
             infuraId: `${process.env.NEXT_PUBLIC_INFURA_KEY}`,
             rpc: {
-              42161: `https://rpc.ankr.com/arbitrum`,
+              42161: ArbitrumRPC,
             },
             supportedChainIds: [42161],
             network: "arbitrum",
@@ -50,7 +52,7 @@ export const WalletConnect = (props) => {
           options: {
             infuraId: `${process.env.NEXT_PUBLIC_INFURA_KEY}`,
             rpc: {
-              42161: `https://rpc.ankr.com/arbitrum`,
+              42161: ArbitrumRPC,
             },
             network: "arbitrum",
             supportedChainIds: [42161],
