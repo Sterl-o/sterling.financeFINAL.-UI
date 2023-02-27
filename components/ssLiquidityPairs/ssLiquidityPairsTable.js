@@ -1942,7 +1942,7 @@ export default function EnhancedTable({ pairs, isLoading }) {
                                         )}%</b></td>
                                       </tr> */}
                                       <tr>
-                                        <td>Max APR</td>
+                                        <td>APR</td>
                                         <td style={{textAlign: 'right'}}><b>{formatCurrency(
                                             BigNumber(row?.gauge?.derivedAPR),
                                             2
@@ -3240,7 +3240,7 @@ export default function EnhancedTable({ pairs, isLoading }) {
                                                 )}%</b></td>
                                               </tr> */}
                                               <tr>
-                                                <td>Max APR</td>
+                                                <td>APR</td>
                                                 <td style={{textAlign: 'right'}}><b>{formatCurrency(
                                                     BigNumber(row?.gauge?.derivedAPR),
                                                     2
