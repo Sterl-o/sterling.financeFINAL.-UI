@@ -495,7 +495,10 @@ class MultiSwapStore {
                 if (item.percentage !== null) {
                     acc.push([item])
                 } else {
-                    acc[acc.length - 1].push(item)
+                    if (acc.length === 0)
+                        return acc
+                    else {
+                        acc[acc.length - 1].push(item)}
                 }
                 return acc
             }, []) ?? []

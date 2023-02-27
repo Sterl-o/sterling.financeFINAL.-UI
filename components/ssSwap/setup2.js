@@ -552,7 +552,9 @@ function Setup() {
         let tokenOut = null
         const baseAsset = stores.stableSwapStore.getStore("baseAssets");
 
+        console.log("baseAsset", baseAsset)
         baseAsset.forEach((asset) => {
+            console.log("baseAsset s", asset)
             if (asset.address?.toLowerCase() === route.tokenIn?.toLowerCase()) {
                 tokenIn = asset
             }
