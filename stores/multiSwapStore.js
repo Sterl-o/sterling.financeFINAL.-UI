@@ -612,12 +612,14 @@ class MultiSwapStore {
           })
           ?.reduce((acc, item) => {
             if (item.percentage !== null) {
-              if (acc.length === 0) return acc;
-              else {
-                acc[acc.length - 1].push(item);
-              }
-              return acc;
+                acc.push([item])
+            } else {
+                if (acc.length === 0)
+                    return acc
+                else {
+                    acc[acc.length - 1].push(item)}
             }
+            return acc
           }, []) ?? []
       );
     }
