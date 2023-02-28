@@ -476,13 +476,13 @@ a.linkz {
   background-color: var(--main-secondary-light) !important;
 }
 
-@media (min-width: 1950px) {
+/* @media (min-width: 1950px) {
   .navigationContainer {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
   }
-}
+} */
 
 @media (max-width: 1550px) {
   .navigationContainer {
