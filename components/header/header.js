@@ -493,7 +493,7 @@ function Header(props) {
           >
             <div
               className={[classes.statButton, classes[`statButton--${appTheme}`], 'g-flex', 'g-flex--align-center'].join(' ')}
-              onClick={() => window.open("https://info.sterling.exchange/home", "_blank")}>
+              onClick={() => window.open("https://dune.com/uwusanauwu/sterling", "_blank")}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   style={{marginRight: 5}}
