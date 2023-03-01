@@ -468,10 +468,17 @@ class MultiSwapStore {
 
       // query old router for direct swap routes
       if (this.isDirectRoute || this.isMultiswapInclude) {
+        const [rawFromAsset, rawToAsset] = await Promise.all([
+          this.tokenIn === FTM_SYMBOL ? this._getToken(this.tokenIn, false) : Promise.resolve(null),
+          this.tokenOut === FTM_SYMBOL ? this._getToken(this.tokenOut, false) : Promise.resolve(null),
+        ])
+
         const response = await stores.stableSwapStore.quoteSwap({
           content: {
             fromAsset: tokenIn,
             toAsset: tokenOut,
+            rawFromAsset,
+            rawToAsset,
             fromAmount: this.swapAmount,
           },
         });

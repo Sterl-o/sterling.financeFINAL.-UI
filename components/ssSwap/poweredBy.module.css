@@ -1,0 +1,20 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  color: #DBE6EC;
+  font-weight: 500;
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.externalLink {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  margin-left: 8px;
+  color: inherit;
+}
+
+.externalLink img {
+  margin-right: 4px;
+}

@@ -1,6 +1,7 @@
 import BigNumber from "bignumber.js";
 import {ACTIONS, CONTRACTS, DIRECT_SWAP_ROUTES} from "../constants";
 import {formatBN, parseBN, buildRoutes, getPrice, getAmountOut, retryForSwapQuote} from '../../utils';
+import { FirebirdAggregator } from "utils/firebird";
 
 export const quoteAddLiquidity = async (
   payload,
@@ -110,17 +111,18 @@ export const quoteSwap = async (
   web3,
   routeAssets,
   emitter,
-  baseAssets
+  baseAssets,
+  account
 ) => {
   try {
-    const {fromAsset, toAsset, fromAmount} = payload.content;
+    const {fromAsset, toAsset, rawFromAsset, rawToAsset, fromAmount, slippage} = payload.content;
+    const amountIn = new BigNumber(fromAmount || 0);
     if (
       !fromAsset ||
       !toAsset ||
-      !fromAmount ||
       !fromAsset.address ||
       !toAsset.address ||
-      fromAmount === ""
+      amountIn.lte(0)
     ) {
       return null;
     }
@@ -180,24 +182,32 @@ export const quoteSwap = async (
         .map((el) => el.value);
     };
 
-    const receiveAmounts = await retryCall();
+    const firebirdCall = FirebirdAggregator.getQuote(
+      rawFromAsset?.address || fromAsset.address,
+      rawToAsset?.address || toAsset.address,
+      sendFromAmount,
+      { receiver: account?.address, slippage }
+    ).catch(() => null)
 
-    if (receiveAmounts === null) {
-      return null;
+    const [receiveAmounts, fbQuote0] = await Promise.all([
+      retryCall().catch(() => []),
+      firebirdCall,
+    ]);
+
+    if (receiveAmounts) {
+      amountOuts = amountOuts.filter((el) => el !== null);
+
+      for (let i = 0; i < receiveAmounts.length; i++) {
+        amountOuts[i].receiveAmounts = receiveAmounts[i];
+        amountOuts[i].finalValue = BigNumber(
+          receiveAmounts[i][receiveAmounts[i].length - 1]
+        )
+          .div(10 ** parseInt(toAsset.decimals))
+          .toFixed(parseInt(toAsset.decimals));
+      }
     }
 
-    amountOuts = amountOuts.filter((el) => el !== null);
-
-    for (let i = 0; i < receiveAmounts.length; i++) {
-      amountOuts[i].receiveAmounts = receiveAmounts[i];
-      amountOuts[i].finalValue = BigNumber(
-        receiveAmounts[i][receiveAmounts[i].length - 1]
-      )
-        .div(10 ** parseInt(toAsset.decimals))
-        .toFixed(parseInt(toAsset.decimals));
-    }
-
-    const bestAmountOut = amountOuts
+    let bestAmountOut = amountOuts
       .filter((ret) => {
         return ret != null;
       })
@@ -210,6 +220,38 @@ export const quoteSwap = async (
           : current;
       }, 0);
 
+    // compare price with the Firebird Aggregator
+    const toDecimals = parseInt(toAsset.decimals)
+    let totalOut = new BigNumber(bestAmountOut?.finalValue || 0).multipliedBy(10 ** toDecimals)
+    const totalOut0 = new BigNumber(fbQuote0?.quoteData?.maxReturn?.totalTo || 0)
+    const fbPaths = fbQuote0?.quoteData?.maxReturn?.paths
+    let totalHop = 0
+    if (Array.isArray(fbPaths)) {
+      totalHop = fbPaths.reduce((t, v) => t + (Array.isArray(v.swaps) ? v.swaps.length : 0), 0)
+    }
+    let fbQuote
+
+    if (totalHop > 1 && totalOut0.gt(totalOut)) {
+      totalOut = totalOut0
+      fbQuote = fbQuote0
+    }
+
+    if (fbQuote) {
+      if (!bestAmountOut) {
+        bestAmountOut = {}
+      }
+      // update bestAmountOut properties
+      bestAmountOut.finalValue = totalOut.div(10 ** toDecimals).toFixed(toDecimals, BigNumber.ROUND_DOWN)
+      bestAmountOut.receiveAmounts = [fbQuote.quoteData.maxReturn.totalFrom, fbQuote.quoteData.maxReturn.totalTo]
+      bestAmountOut.routeAsset = null
+      bestAmountOut.routes = []
+      bestAmountOut.firebirdQuote = fbQuote
+    }
+
+    const tokens = fbQuote0?.quoteData?.maxReturn?.tokens || {}
+    const fromPrice = tokens[addy0.toLowerCase()]?.price
+    const toPrice = tokens[addy1.toLowerCase()]?.price
+
     if (bestAmountOut === 0) {
       emitter.emit(
         ACTIONS.ERROR,
@@ -218,58 +260,64 @@ export const quoteSwap = async (
       return null;
     }
 
-    const libraryContract = new web3.eth.Contract(
-      CONTRACTS.LIBRARY_ABI,
-      CONTRACTS.LIBRARY_ADDRESS
-    );
-    let totalRatio = 1;
+    let priceImpact = '0'
+    if (!bestAmountOut.firebirdQuote) {
+      const libraryContract = new web3.eth.Contract(
+        CONTRACTS.LIBRARY_ABI,
+        CONTRACTS.LIBRARY_ADDRESS
+      );
+      let totalRatio = 1;
 
-    for (let i = 0; i < bestAmountOut.routes.length; i++) {
-      let amountIn = bestAmountOut.receiveAmounts[i];
+      for (let i = 0; i < bestAmountOut.routes.length; i++) {
+        let amountIn = bestAmountOut.receiveAmounts[i];
 
-      try {
-        const tokenInDecimals = baseAssets
-          .filter(a => a?.address?.toLowerCase() === bestAmountOut.routes[i].from?.toLowerCase())[0]
-          .decimals
+        try {
+          const tokenInDecimals = baseAssets
+            .filter(a => a?.address?.toLowerCase() === bestAmountOut.routes[i].from?.toLowerCase())[0]
+            .decimals
 
-        const reserves = await libraryContract.methods
-          .getNormalizedReserves(
+          const reserves = await libraryContract.methods
+            .getNormalizedReserves(
+              bestAmountOut.routes[i].from,
+              bestAmountOut.routes[i].to,
+              bestAmountOut.routes[i].stable
+            ).call();
+
+          const priceWithoutImpact = getPrice(
+            BigNumber(reserves[0]).div(1e18),
+            BigNumber(reserves[1]).div(1e18),
+            bestAmountOut.routes[i].stable
+          ).times(BigNumber(amountIn).div(10 ** parseInt(tokenInDecimals)));
+
+          const priceAfterSwap = getAmountOut(
+            BigNumber(amountIn).div(10 ** parseInt(tokenInDecimals)),
+            BigNumber(reserves[0]).div(1e18),
+            BigNumber(reserves[1]).div(1e18),
+            bestAmountOut.routes[i].stable
+          );
+
+          const ratio = priceAfterSwap.div(priceWithoutImpact);
+          totalRatio = BigNumber(totalRatio).times(ratio).toFixed(18);
+        } catch (e) {
+          console.log('Error define trade difference for',
+            amountIn?.toString(),
             bestAmountOut.routes[i].from,
             bestAmountOut.routes[i].to,
-            bestAmountOut.routes[i].stable
-          ).call();
+            bestAmountOut.routes[i].stable, e)
+        }
 
-        const priceWithoutImpact = getPrice(
-          BigNumber(reserves[0]).div(1e18),
-          BigNumber(reserves[1]).div(1e18),
-          bestAmountOut.routes[i].stable
-        ).times(BigNumber(amountIn).div(10 ** parseInt(tokenInDecimals)));
-
-        const priceAfterSwap = getAmountOut(
-          BigNumber(amountIn).div(10 ** parseInt(tokenInDecimals)),
-          BigNumber(reserves[0]).div(1e18),
-          BigNumber(reserves[1]).div(1e18),
-          bestAmountOut.routes[i].stable
-        );
-
-        const ratio = priceAfterSwap.div(priceWithoutImpact);
-        totalRatio = BigNumber(totalRatio).times(ratio).toFixed(18);
-      } catch (e) {
-        console.log('Error define trade difference for',
-          amountIn?.toString(),
-          bestAmountOut.routes[i].from,
-          bestAmountOut.routes[i].to,
-          bestAmountOut.routes[i].stable, e)
       }
 
+      priceImpact = BigNumber(1).minus(totalRatio).times(100).toFixed(18);
     }
 
-    const priceImpact = BigNumber(1).minus(totalRatio).times(100).toFixed(18);
     const returnValue = {
       inputs: {
         fromAmount: fromAmount,
         fromAsset: fromAsset,
         toAsset: toAsset,
+        fromPrice,
+        toPrice,
       },
       output: bestAmountOut,
       priceImpact: priceImpact,

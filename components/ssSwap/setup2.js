@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import {
     TextField,
@@ -24,8 +24,15 @@ import AssetSelect from "../../ui/AssetSelect";
 import { observer } from 'mobx-react'
 import * as ethers from 'ethers'
 import { toFixed } from './utils'
+import Form from 'ui/Form'
+import useDebounce from 'hooks/useDebounce'
+import useAccount from 'hooks/useAccount'
+import SwapRouting from './swapRouting'
+import SwapDetails from './swapDetails'
+import PoweredBy from './poweredBy'
 
 const MAX_PRICE_IMPACT = 10;
+const MILLISECONDS_AUTO_REFRESH_RATE = 10000;
 
 const MultiSwap = observer((props) => {
     const multiSwapStore = stores.multiSwapStore;
@@ -90,6 +97,7 @@ function Setup() {
     const [approvalLoading, setApprovalLoading] = useState(false);
 
     const [fromAmountValue, setFromAmountValue] = useState("");
+    const [fakeFromValue, setFakeFromValue] = useState("");
     const [fromAmountError, setFromAmountError] = useState(false);
     const [fromAssetValue, setFromAssetValue] = useState(null);
     const [fromAssetError, setFromAssetError] = useState(false);
@@ -109,8 +117,11 @@ function Setup() {
     const [hidequote, sethidequote] = useState(false);
     const [hintAnchor, setHintAnchor] = React.useState(null);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [, setFetchCounter] = useState(0);
+    const [showInverted, setShowInverted] = useState(false);
 
     const { appTheme } = useAppThemeContext();
+    const account = useAccount();
 
     const handleClickPopover = (event) => {
         setHintAnchor(event.currentTarget);
@@ -323,6 +334,8 @@ function Setup() {
         [fromAmountValue, fromAssetValue, toAssetValue]
     );
 
+    const resetFetchCounter = useCallback(() => setFetchCounter(0), [])
+
     const onAssetSelect = (type, value) => {
         let from, to;
         if (type === "From") {
@@ -443,6 +456,7 @@ function Setup() {
 
         router.push(`/swap?from=${from}&to=${to}`, undefined, { shallow: true })
 
+        resetFetchCounter();
         forceUpdate();
     };
 
@@ -456,6 +470,7 @@ function Setup() {
         if (value == "" || Number(value) === 0) {
             setToAmountValue("");
             // setQuote(null);
+            resetFetchCounter();
         } else {
             if (
                 !(
@@ -465,7 +480,8 @@ function Setup() {
                 )
             ) {
                 sethidequote(false);
-                calculateReceiveAmount(value, fromAssetValue, toAssetValue);
+                // calculateReceiveAmount(value, fromAssetValue, toAssetValue);
+                setFakeFromValue(value);
             } else {
                 // console.log('from amount changed wrap/unwrap')
                 sethidequote(true);
@@ -473,6 +489,14 @@ function Setup() {
             }
         }
     };
+
+    const debouncedFromValue = useDebounce(fakeFromValue, 400)
+
+    useEffect(() => {
+        if (debouncedFromValue === fromAmountValue) {
+            calculateReceiveAmount(fromAmountValue, fromAssetValue, toAssetValue)
+        }
+    }, [debouncedFromValue])
 
     const toAmountChanged = (event) => { };
 
@@ -494,6 +518,7 @@ function Setup() {
                         fromAsset: from,
                         toAsset: to,
                         fromAmount: amount,
+                        slippage,
                     },
                 });
             }
@@ -524,6 +549,7 @@ function Setup() {
     };
 
     const swapAssets = () => {
+        resetFetchCounter();
         multiSwapStore.reverseTokens()
         const fa = fromAssetValue;
         const ta = toAssetValue;
@@ -567,6 +593,26 @@ function Setup() {
 
         return {tokenIn, tokenOut};
     }
+
+    const updateRate = () => {
+        setFetchCounter(pre => pre + 1)
+        calculateReceiveAmount(fromAmountValue, fromAssetValue, toAssetValue)
+    };
+
+    useEffect(() => {
+        let interval = null
+        if (!loading && fromAmountValue && fromAssetValue && toAssetValue) {
+            interval = setInterval(() => updateRate(), MILLISECONDS_AUTO_REFRESH_RATE)
+        }
+
+        return () => interval && clearInterval(interval)
+    }, [fromAmountValue, fromAssetValue, toAssetValue, loading]);
+
+    useEffect(() => {
+        if (fromAmountValue && fromAssetValue && toAssetValue) {
+            updateRate()
+        }
+    }, [account]);
 
     const renderSwapInformation = (args) => {
         const { routes, multiswapData, directSwapRoute, multiswapExclude } = args
@@ -1291,418 +1337,444 @@ function Setup() {
 
                 return (
                     <>
-                        <div className={classes.swapInputs}>
-                            {renderMassiveInput(
-                                "From",
-                                swapAmount,
-                                fromAmountError,
-                                (event) => {
-                                    fromAmountChanged(event)
-                                    const value = formatInputAmount(event.target.value.replace(",", "."));
-                                    setSwapAmount(value)
-                                },
-                                fromAssetValue,
-                                fromAssetError,
-                                !DIRECT_SWAP_ROUTES[toAssetValue?.address.toLowerCase()]
-                                    ? fromAssetOptions
-                                    : fromAssetOptions
-                                        .filter(a => DIRECT_SWAP_ROUTES[toAssetValue?.address.toLowerCase()] === a.address.toLowerCase()),
-                                onAssetSelect
-                            )}
+                        <div className={classes.swapGrid}>
+                            <div className={classes.swapInputsWrapper}>
+                                <div className={classes.swapInputsForm}>
+                                    <Form>
+                                        <div className={classes.swapInputs}>
+                                            {renderMassiveInput(
+                                              "From",
+                                              swapAmount,
+                                              fromAmountError,
+                                              (event) => {
+                                                  fromAmountChanged(event)
+                                                  const value = formatInputAmount(event.target.value.replace(",", "."));
+                                                  setSwapAmount(value)
+                                              },
+                                              fromAssetValue,
+                                              fromAssetError,
+                                              !DIRECT_SWAP_ROUTES[toAssetValue?.address.toLowerCase()]
+                                                ? fromAssetOptions
+                                                : fromAssetOptions
+                                                  .filter(a => DIRECT_SWAP_ROUTES[toAssetValue?.address.toLowerCase()] === a.address.toLowerCase()),
+                                              onAssetSelect
+                                            )}
 
-                            {fromAssetError && (
-                                <div
-                                    style={{ marginTop: 20 }}
-                                    className={[
-                                        classes.warningContainer,
-                                        classes[`warningContainer--${appTheme}`],
-                                        classes.warningContainerError,
-                                    ].join(" ")}
-                                >
-                                    <div
-                                        className={[
-                                            classes.warningDivider,
-                                            classes.warningDividerError,
-                                        ].join(" ")}
-                                    ></div>
-                                    <Typography
-                                        className={[
-                                            classes.warningError,
-                                            classes[`warningText--${appTheme}`],
-                                        ].join(" ")}
-                                        align="center"
-                                    >
-                                        {fromAssetError}
-                                    </Typography>
+                                            {fromAssetError && (
+                                              <div
+                                                style={{ marginTop: 20 }}
+                                                className={[
+                                                    classes.warningContainer,
+                                                    classes[`warningContainer--${appTheme}`],
+                                                    classes.warningContainerError,
+                                                ].join(" ")}
+                                              >
+                                                  <div
+                                                    className={[
+                                                        classes.warningDivider,
+                                                        classes.warningDividerError,
+                                                    ].join(" ")}
+                                                  ></div>
+                                                  <Typography
+                                                    className={[
+                                                        classes.warningError,
+                                                        classes[`warningText--${appTheme}`],
+                                                    ].join(" ")}
+                                                    align="center"
+                                                  >
+                                                      {fromAssetError}
+                                                  </Typography>
+                                              </div>
+                                            )}
+
+                                            <div
+                                              className={[
+                                                  classes.swapIconContainer,
+                                                  classes[`swapIconContainer--${appTheme}`],
+                                              ].join(" ")}
+                                              onMouseOver={swapIconHover}
+                                              onMouseOut={swapIconDefault}
+                                              onMouseDown={swapIconClick}
+                                              onMouseUp={swapIconDefault}
+                                              onTouchStart={swapIconClick}
+                                              onTouchEnd={swapIconDefault}
+                                              onClick={swapAssets}
+                                            >
+                                                {windowWidth > 470 && (
+                                                  <svg
+                                                    width="80"
+                                                    height="80"
+                                                    viewBox="0 0 80 80"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                      <circle
+                                                        cx="40"
+                                                        cy="40"
+                                                        r="39.5"
+                                                        fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
+                                                        stroke={appTheme === "dark" ? "#855f5f" : "#86B9D6"}
+                                                      />
+
+                                                      <rect
+                                                        y="30"
+                                                        width="4"
+                                                        height="20"
+                                                        fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
+                                                      />
+
+                                                      <rect
+                                                        x="76"
+                                                        y="30"
+                                                        width="4"
+                                                        height="20"
+                                                        fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
+                                                      />
+
+                                                      <circle
+                                                        cx="40"
+                                                        cy="40"
+                                                        r="29.5"
+                                                        fill={
+                                                          swapIconBgColor || (appTheme === "dark" ? "#24292D" : "#B9DFF5")
+                                                        }
+                                                        stroke={
+                                                          swapIconBorderColor ||
+                                                          (appTheme === "dark" ? "#855f5f" : "#86B9D6")
+                                                        }
+                                                      />
+
+                                                      <path
+                                                        d="M41.0002 44.172L46.3642 38.808L47.7782 40.222L40.0002 48L32.2222 40.222L33.6362 38.808L39.0002 44.172V32H41.0002V44.172Z"
+                                                        fill={
+                                                          swapIconArrowColor ||
+                                                          (appTheme === "dark" ? "#e64c4c" : "#8e0b0b")
+                                                        }
+                                                      />
+                                                  </svg>
+                                                )}
+
+                                                {windowWidth <= 470 && (
+                                                  <svg
+                                                    width="50"
+                                                    height="50"
+                                                    viewBox="0 0 50 50"
+                                                    fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                      <circle
+                                                        cx="25"
+                                                        cy="25"
+                                                        r="24.5"
+                                                        fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
+                                                        stroke={appTheme === "dark" ? "#855f5f" : "#86B9D6"}
+                                                      />
+
+                                                      <rect
+                                                        y="20"
+                                                        width="3"
+                                                        height="10"
+                                                        fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
+                                                      />
+
+                                                      <rect
+                                                        x="48"
+                                                        y="20"
+                                                        width="2"
+                                                        height="10"
+                                                        fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
+                                                      />
+
+                                                      <circle
+                                                        cx="25"
+                                                        cy="25"
+                                                        r="18.5"
+                                                        fill={
+                                                          swapIconBgColor || (appTheme === "dark" ? "#24292D" : "#B9DFF5")
+                                                        }
+                                                        stroke={
+                                                          swapIconBorderColor ||
+                                                          (appTheme === "dark" ? "#855f5f" : "#86B9D6")
+                                                        }
+                                                      />
+
+                                                      <path
+                                                        d="M25.8336 28.4773L30.3036 24.0073L31.4819 25.1857L25.0002 31.6673L18.5186 25.1857L19.6969 24.0073L24.1669 28.4773V18.334H25.8336V28.4773Z"
+                                                        fill={
+                                                          swapIconArrowColor ||
+                                                          (appTheme === "dark" ? "#ffffff" : "#ffffff")
+                                                        }
+                                                      />
+                                                  </svg>
+                                                )}
+                                            </div>
+
+                                            {renderMassiveInput(
+                                              "To",
+                                              multiSwapStore.isWrapUnwrap|| multiSwapStore.isMultiswapInclude ? toAmountValue : swap?.returnAmount
+                                                ? ethers.utils.formatUnits(swap?.returnAmount, toAssetValue?.decimals)
+                                                : swap?.returnAmount
+                                              ,
+                                              toAmountError,
+                                              toAmountChanged,
+                                              toAssetValue,
+                                              toAssetError,
+                                              !DIRECT_SWAP_ROUTES[fromAssetValue?.address.toLowerCase()]
+                                                ? toAssetOptions
+                                                : toAssetOptions
+                                                  .filter(a => DIRECT_SWAP_ROUTES[fromAssetValue?.address.toLowerCase()] === a.address.toLowerCase()),
+                                              onAssetSelect
+                                            )}
+
+                                            {renderSmallInput(
+                                              "slippage",
+                                              slippage,
+                                              slippageError,
+                                              (event) => {
+                                                  setSlippage(event.target.value)
+                                                  // onSlippageChanged(event)
+                                              }
+                                            )}
+
+                                            {(!isFetchingSwapQuery
+                                                && multiSwapStore.error === null
+                                                && multiSwapStore.priceImpact !== null
+                                                && !multiSwapStore.isWrapUnwrap
+                                                && !quote?.output?.firebirdQuote
+                                              )
+                                              && (
+                                                <>
+                                                    <Typography
+                                                      style={{ marginTop: 5 }}
+                                                      className={[
+                                                          multiSwapStore.priceImpact > 5
+                                                            ? classes.warningError
+                                                            : classes.warningWarning,
+                                                          classes[`warningText--${appTheme}`],
+                                                      ].join(" ")}
+                                                      align="center"
+                                                    >
+                                                        Price impact: {parseFloat(parseFloat(multiSwapStore.priceImpact).toFixed(2))}%
+                                                    </Typography>
+                                                </>
+                                              )}
+
+                                            {fromAmountValue > Number(fromAssetValue?.balance) && (
+                                              <div
+                                                className={[
+                                                    classes.warningContainer,
+                                                    classes[`warningContainer--${appTheme}`],
+                                                    classes.warningContainerError,
+                                                ].join(" ")}
+                                              >
+                                                  <div
+                                                    className={[
+                                                        classes.warningDivider,
+                                                        classes.warningDividerError,
+                                                    ].join(" ")}
+                                                  ></div>
+
+                                                  <Typography
+                                                    className={[
+                                                        classes.warningError,
+                                                        classes[`warningText--${appTheme}`],
+                                                    ].join(" ")}
+                                                    align="center"
+                                                  >
+                                                      Balance is below the entered value
+                                                  </Typography>
+                                              </div>
+                                            )}
+
+                                            {parseFloat(multiSwapStore.priceImpact) > MAX_PRICE_IMPACT && (
+                                              <div
+                                                className={[
+                                                    classes.warningContainer,
+                                                    classes[`warningContainer--${appTheme}`],
+                                                    classes.warningContainerError,
+                                                ].join(" ")}
+                                              >
+                                                  <div
+                                                    className={[
+                                                        classes.warningDivider,
+                                                        classes.warningDividerError,
+                                                    ].join(" ")}
+                                                  ></div>
+
+                                                  <Typography
+                                                    className={[
+                                                        classes.warningError,
+                                                        classes[`warningText--${appTheme}`],
+                                                    ].join(" ")}
+                                                    align="center"
+                                                  >
+                                                      Price impact too high
+                                                  </Typography>
+                                              </div>
+                                            )}
+
+                                            {loadingMessage === ''
+                                              && multiSwapStore.swap !== null
+                                              && multiSwapStore.error === null
+                                              && multiSwapStore.isWrapUnwrap === false
+                                              && (!multiSwapStore.isMultiswapInclude || quote?.output?.finalValue)
+                                              && (
+                                                <>
+                                                    <Typography
+                                                      className={[
+                                                          classes.depositInfoHeading,
+                                                          classes[`depositInfoHeading--${appTheme}`],
+                                                          classes.depositInfoHeadingPrice,
+                                                      ].join(" ")}
+                                                    >
+                                                        Price Info
+                                                    </Typography>
+
+                                                    <div
+                                                      className={[
+                                                          classes.priceInfos,
+                                                          classes[`priceInfos--${appTheme}`],
+                                                      ].join(" ")}
+                                                    >
+                                                        <div
+                                                          className={[
+                                                              classes.priceInfo,
+                                                              classes[`priceInfo--${appTheme}`],
+                                                          ].join(" ")}
+                                                        >
+                                                            <Typography className={classes.text}>
+                                                                {`${fromAssetValue?.symbol} per ${toAssetValue?.symbol}`}
+                                                            </Typography>
+
+                                                            <Typography className={classes.title}>
+                                                                {multiSwapStore.isMultiswapInclude ?
+                                                                  formatCurrency(
+                                                                    BigNumber(quote.inputs.fromAmount)
+                                                                      .div(quote.output.finalValue)
+                                                                      .toFixed(18)
+                                                                  ) : multiSwapStore.priceInfo.tokenOutPrice < 1
+                                                                    ? toFixed(multiSwapStore.priceInfo.tokenOutPrice + '')
+                                                                    : multiSwapStore.priceInfo.tokenOutPrice?.toFixed(2)
+                                                                }
+                                                            </Typography>
+                                                        </div>
+
+                                                        <div
+                                                          className={[
+                                                              classes.priceInfo,
+                                                              classes[`priceInfo--${appTheme}`],
+                                                          ].join(" ")}
+                                                        >
+                                                            <Typography className={classes.text}>
+                                                                {`${toAssetValue?.symbol} per ${fromAssetValue?.symbol}`}
+                                                            </Typography>
+
+                                                            <Typography className={classes.title}>
+                                                                {multiSwapStore.isMultiswapInclude ? formatCurrency(
+                                                                  BigNumber(quote.output.finalValue)
+                                                                    .div(quote.inputs.fromAmount)
+                                                                    .toFixed(18)
+                                                                ) : multiSwapStore.priceInfo.tokenInPrice < 1
+                                                                  ? toFixed(multiSwapStore.priceInfo.tokenInPrice + '')
+                                                                  : multiSwapStore.priceInfo.tokenInPrice?.toFixed(2)
+                                                                }
+                                                            </Typography>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                              )}
+
+                                            {multiSwapStore.error && (
+                                              <div
+                                                style={{ marginTop: 15, marginBottom: 10 }}
+                                                className={[
+                                                    classes.warningContainer,
+                                                    classes[`warningContainer--${appTheme}`],
+                                                    classes.warningContainerError,
+                                                ].join(" ")}
+                                              >
+                                                  <div
+                                                    className={[
+                                                        classes.warningDivider,
+                                                        classes.warningDividerError,
+                                                    ].join(" ")}
+                                                  ></div>
+                                                  <Typography
+                                                    className={[
+                                                        classes.warningError,
+                                                        classes[`warningText--${appTheme}`],
+                                                    ].join(" ")}
+                                                    align="center"
+                                                  >
+                                                      {multiSwapStore.error}
+                                                  </Typography>
+                                              </div>
+                                            )}
+
+                                            {/*{!hidequote ? renderSwapInformation({ routes, multiswapData,  directSwapRoute: multiSwapStore.isDirectRoute, multiswapExclude: multiSwapStore.isMultiswapInclude }) : null}*/}
+
+                                            {(isFetchingApprove || isFetchingSwap) && (
+                                              <div className={classes.loader}>
+                                                  <Loader color={appTheme === "dark" ? "#e85a5a" : "#e85a5a"} />
+                                              </div>
+                                            )}
+
+                                            {loadingMessage !== '' && (
+                                              <div classes={classes.loadingMessageWrapper}>
+                                                  <div
+                                                    className={[classes.quoteLoader, classes.quoteLoaderLoading].join(
+                                                      " "
+                                                    )}
+                                                  >
+                                                      <CircularProgress
+                                                        size={20}
+                                                        className={classes.loadingCircle}
+                                                      />
+                                                      <div
+                                                        className={[
+                                                            classes.loadingMessage,
+                                                            classes[`loadingMessage--${appTheme}`]
+                                                        ].join(' ')}
+                                                      >
+                                                          {loadingMessage}
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                            )}
+
+
+                                            <BtnSwap
+                                              onClick={handleClickButton}
+                                              className={classes.btnSwap}
+                                              labelClassName={
+                                                  disableButton
+                                                    ? classes["actionButtonText--disabled"]
+                                                    : classes.actionButtonText
+                                              }
+                                              isDisabled={disableButton}
+                                              label={buttonLabel}
+                                            ></BtnSwap>
+                                        </div>
+                                    </Form>
                                 </div>
-                            )}
 
-                            <div
-                                className={[
-                                    classes.swapIconContainer,
-                                    classes[`swapIconContainer--${appTheme}`],
-                                ].join(" ")}
-                                onMouseOver={swapIconHover}
-                                onMouseOut={swapIconDefault}
-                                onMouseDown={swapIconClick}
-                                onMouseUp={swapIconDefault}
-                                onTouchStart={swapIconClick}
-                                onTouchEnd={swapIconDefault}
-                                onClick={swapAssets}
-                            >
-                                {windowWidth > 470 && (
-                                    <svg
-                                        width="80"
-                                        height="80"
-                                        viewBox="0 0 80 80"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <circle
-                                            cx="40"
-                                            cy="40"
-                                            r="39.5"
-                                            fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
-                                            stroke={appTheme === "dark" ? "#855f5f" : "#86B9D6"}
-                                        />
+                                {!quoteError && !quoteLoading && !!quote ? (
+                                  <SwapDetails
+                                    quote={quote}
+                                    fromAssetValue={fromAssetValue}
+                                    toAssetValue={toAssetValue}
+                                    showInverted={showInverted}
+                                    setShowInverted={setShowInverted}
+                                    slippage={slippage}
+                                  />
+                                ) : null}
 
-                                        <rect
-                                            y="30"
-                                            width="4"
-                                            height="20"
-                                            fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
-                                        />
-
-                                        <rect
-                                            x="76"
-                                            y="30"
-                                            width="4"
-                                            height="20"
-                                            fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
-                                        />
-
-                                        <circle
-                                            cx="40"
-                                            cy="40"
-                                            r="29.5"
-                                            fill={
-                                                swapIconBgColor || (appTheme === "dark" ? "#24292D" : "#B9DFF5")
-                                            }
-                                            stroke={
-                                                swapIconBorderColor ||
-                                                (appTheme === "dark" ? "#855f5f" : "#86B9D6")
-                                            }
-                                        />
-
-                                        <path
-                                            d="M41.0002 44.172L46.3642 38.808L47.7782 40.222L40.0002 48L32.2222 40.222L33.6362 38.808L39.0002 44.172V32H41.0002V44.172Z"
-                                            fill={
-                                                swapIconArrowColor ||
-                                                (appTheme === "dark" ? "#e64c4c" : "#8e0b0b")
-                                            }
-                                        />
-                                    </svg>
-                                )}
-
-                                {windowWidth <= 470 && (
-                                    <svg
-                                        width="50"
-                                        height="50"
-                                        viewBox="0 0 50 50"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <circle
-                                            cx="25"
-                                            cy="25"
-                                            r="24.5"
-                                            fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
-                                            stroke={appTheme === "dark" ? "#855f5f" : "#86B9D6"}
-                                        />
-
-                                        <rect
-                                            y="20"
-                                            width="3"
-                                            height="10"
-                                            fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
-                                        />
-
-                                        <rect
-                                            x="48"
-                                            y="20"
-                                            width="2"
-                                            height="10"
-                                            fill={appTheme === "dark" ? "#151718" : "#DBE6EC"}
-                                        />
-
-                                        <circle
-                                            cx="25"
-                                            cy="25"
-                                            r="18.5"
-                                            fill={
-                                                swapIconBgColor || (appTheme === "dark" ? "#24292D" : "#B9DFF5")
-                                            }
-                                            stroke={
-                                                swapIconBorderColor ||
-                                                (appTheme === "dark" ? "#855f5f" : "#86B9D6")
-                                            }
-                                        />
-
-                                        <path
-                                            d="M25.8336 28.4773L30.3036 24.0073L31.4819 25.1857L25.0002 31.6673L18.5186 25.1857L19.6969 24.0073L24.1669 28.4773V18.334H25.8336V28.4773Z"
-                                            fill={
-                                                swapIconArrowColor ||
-                                                (appTheme === "dark" ? "#ffffff" : "#ffffff")
-                                            }
-                                        />
-                                    </svg>
-                                )}
+                                <PoweredBy />
                             </div>
 
-                            {renderMassiveInput(
-                                "To",
-                                multiSwapStore.isWrapUnwrap|| multiSwapStore.isMultiswapInclude ? toAmountValue : swap?.returnAmount
-                                    ? ethers.utils.formatUnits(swap?.returnAmount, toAssetValue?.decimals)
-                                    : swap?.returnAmount
-                                ,
-                                toAmountError,
-                                toAmountChanged,
-                                toAssetValue,
-                                toAssetError,
-                                !DIRECT_SWAP_ROUTES[fromAssetValue?.address.toLowerCase()]
-                                    ? toAssetOptions
-                                    : toAssetOptions
-                                        .filter(a => DIRECT_SWAP_ROUTES[fromAssetValue?.address.toLowerCase()] === a.address.toLowerCase()),
-                                onAssetSelect
-                            )}
-
-                            {renderSmallInput(
-                                "slippage",
-                                slippage,
-                                slippageError,
-                                (event) => {
-                                    setSlippage(event.target.value)
-                                    // onSlippageChanged(event)
-                                }
-                            )}
-
-                            {(!isFetchingSwapQuery
-                                && multiSwapStore.error === null
-                                && multiSwapStore.priceImpact !== null
-                                && !multiSwapStore.isWrapUnwrap
-                                )
-                                && (
-                                    <>
-                                        <Typography
-                                            style={{ marginTop: 5 }}
-                                            className={[
-                                                multiSwapStore.priceImpact > 5
-                                                    ? classes.warningError
-                                                    : classes.warningWarning,
-                                                classes[`warningText--${appTheme}`],
-                                            ].join(" ")}
-                                            align="center"
-                                        >
-                                            Price impact: {parseFloat(parseFloat(multiSwapStore.priceImpact).toFixed(2))}%
-                                        </Typography>
-                                    </>
-                                )}
-
-                            {fromAmountValue > Number(fromAssetValue?.balance) && (
-                                <div
-                                    className={[
-                                        classes.warningContainer,
-                                        classes[`warningContainer--${appTheme}`],
-                                        classes.warningContainerError,
-                                    ].join(" ")}
-                                >
-                                    <div
-                                        className={[
-                                            classes.warningDivider,
-                                            classes.warningDividerError,
-                                        ].join(" ")}
-                                    ></div>
-
-                                    <Typography
-                                        className={[
-                                            classes.warningError,
-                                            classes[`warningText--${appTheme}`],
-                                        ].join(" ")}
-                                        align="center"
-                                    >
-                                        Balance is below the entered value
-                                    </Typography>
-                                </div>
-                            )}
-
-                            {parseFloat(multiSwapStore.priceImpact) > MAX_PRICE_IMPACT && (
-                                <div
-                                    className={[
-                                        classes.warningContainer,
-                                        classes[`warningContainer--${appTheme}`],
-                                        classes.warningContainerError,
-                                    ].join(" ")}
-                                >
-                                    <div
-                                        className={[
-                                            classes.warningDivider,
-                                            classes.warningDividerError,
-                                        ].join(" ")}
-                                    ></div>
-
-                                    <Typography
-                                        className={[
-                                            classes.warningError,
-                                            classes[`warningText--${appTheme}`],
-                                        ].join(" ")}
-                                        align="center"
-                                    >
-                                        Price impact too high
-                                    </Typography>
-                                </div>
-                            )}
-
-                            {loadingMessage === ''
-                                && multiSwapStore.swap !== null
-                                && multiSwapStore.error === null
-                                && multiSwapStore.isWrapUnwrap === false
-                                && (!multiSwapStore.isMultiswapInclude || quote?.output?.finalValue)
-                                && (
-                                    <>
-                                        <Typography
-                                            className={[
-                                                classes.depositInfoHeading,
-                                                classes[`depositInfoHeading--${appTheme}`],
-                                                classes.depositInfoHeadingPrice,
-                                            ].join(" ")}
-                                        >
-                                            Price Info
-                                        </Typography>
-
-                                        <div
-                                            className={[
-                                                classes.priceInfos,
-                                                classes[`priceInfos--${appTheme}`],
-                                            ].join(" ")}
-                                        >
-                                            <div
-                                                className={[
-                                                    classes.priceInfo,
-                                                    classes[`priceInfo--${appTheme}`],
-                                                ].join(" ")}
-                                            >
-                                                <Typography className={classes.text}>
-                                                    {`${fromAssetValue?.symbol} per ${toAssetValue?.symbol}`}
-                                                </Typography>
-
-                                                <Typography className={classes.title}>
-                                                    {multiSwapStore.isMultiswapInclude ?
-                                                        formatCurrency(
-                                                            BigNumber(quote.inputs.fromAmount)
-                                                                .div(quote.output.finalValue)
-                                                                .toFixed(18)
-                                                        ) : multiSwapStore.priceInfo.tokenOutPrice < 1
-                                                            ? toFixed(multiSwapStore.priceInfo.tokenOutPrice + '')
-                                                            : multiSwapStore.priceInfo.tokenOutPrice?.toFixed(2)
-                                                    }
-                                                </Typography>
-                                            </div>
-
-                                            <div
-                                                className={[
-                                                    classes.priceInfo,
-                                                    classes[`priceInfo--${appTheme}`],
-                                                ].join(" ")}
-                                            >
-                                                <Typography className={classes.text}>
-                                                    {`${toAssetValue?.symbol} per ${fromAssetValue?.symbol}`}
-                                                </Typography>
-
-                                                <Typography className={classes.title}>
-                                                    {multiSwapStore.isMultiswapInclude ? formatCurrency(
-                                                            BigNumber(quote.output.finalValue)
-                                                                .div(quote.inputs.fromAmount)
-                                                                .toFixed(18)
-                                                        ) : multiSwapStore.priceInfo.tokenInPrice < 1
-                                                            ? toFixed(multiSwapStore.priceInfo.tokenInPrice + '')
-                                                            : multiSwapStore.priceInfo.tokenInPrice?.toFixed(2)
-                                                    }
-                                                </Typography>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-
-                            {multiSwapStore.error && (
-                                <div
-                                    style={{ marginTop: 15, marginBottom: 10 }}
-                                    className={[
-                                        classes.warningContainer,
-                                        classes[`warningContainer--${appTheme}`],
-                                        classes.warningContainerError,
-                                    ].join(" ")}
-                                >
-                                    <div
-                                        className={[
-                                            classes.warningDivider,
-                                            classes.warningDividerError,
-                                        ].join(" ")}
-                                    ></div>
-                                    <Typography
-                                        className={[
-                                            classes.warningError,
-                                            classes[`warningText--${appTheme}`],
-                                        ].join(" ")}
-                                        align="center"
-                                    >
-                                        {multiSwapStore.error}
-                                    </Typography>
-                                </div>
-                            )}
-
-                            {!hidequote ? renderSwapInformation({ routes, multiswapData,  directSwapRoute: multiSwapStore.isDirectRoute, multiswapExclude: multiSwapStore.isMultiswapInclude }) : null}
-
-                            {(isFetchingApprove || isFetchingSwap) && (
-                                <div className={classes.loader}>
-                                    <Loader color={appTheme === "dark" ? "#e85a5a" : "#e85a5a"} />
-                                </div>
-                            )}
-
-                            {loadingMessage !== '' && (
-                                <div classes={classes.loadingMessageWrapper}>
-                                    <div
-                                        className={[classes.quoteLoader, classes.quoteLoaderLoading].join(
-                                            " "
-                                        )}
-                                    >
-                                        <CircularProgress
-                                            size={20}
-                                            className={classes.loadingCircle}
-                                        />
-                                        <div
-                                            className={[
-                                                classes.loadingMessage,
-                                                classes[`loadingMessage--${appTheme}`]
-                                            ].join(' ')}
-                                        >
-                                            {loadingMessage}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-
-                            <BtnSwap
-                                onClick={handleClickButton}
-                                className={classes.btnSwap}
-                                labelClassName={
-                                    disableButton
-                                        ? classes["actionButtonText--disabled"]
-                                        : classes.actionButtonText
-                                }
-                                isDisabled={disableButton}
-                                label={buttonLabel}
-                            ></BtnSwap>
+                            <div className={classes.swapRouting}>
+                                <SwapRouting quote={quote} fromAsset={fromAssetValue} toAsset={toAssetValue} />
+                            </div>
                         </div>
                     </>
                 )

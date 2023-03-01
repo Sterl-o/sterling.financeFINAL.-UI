@@ -7,6 +7,7 @@ import {ACTIONS, CONTRACTS, MAX_UINT256} from "../constants";
 import {formatCurrency, parseBN} from '../../utils';
 import {emitNewNotifications, emitStatus, emitNotificationDone} from "./emit-helper";
 import {FTM_SYMBOL} from "../constants/contracts";
+import {FirebirdAggregator} from 'utils/firebird';
 
 const getTXUUID = () => {
   return uuidv4();
@@ -44,11 +45,18 @@ export const swap = async (
       },
     ]);
 
+    let encodedData = null;
+    if (quote.output?.firebirdQuote) {
+      console.log('@using Firebird quote', JSON.parse(JSON.stringify(quote)));
+      encodedData = await FirebirdAggregator.encodeQuote(quote.output.firebirdQuote);
+    }
+
     let allowance;
+    const router = encodedData?.router || CONTRACTS.ROUTER_ADDRESS;
 
     // CHECK ALLOWANCES AND SET TX DISPLAY
     if (!isNetworkToken(fromAsset.address)) {
-      allowance = await getTokenAllowance(web3, fromAsset, account, CONTRACTS.ROUTER_ADDRESS);
+      allowance = await getTokenAllowance(web3, fromAsset, account, router);
 
       if (BigNumber(allowance).lt(fromAmount)) {
         await emitStatus(emitter, allowanceTXID, `Allow the router to spend your ${fromAsset.symbol}`)
@@ -69,7 +77,7 @@ export const swap = async (
         web3,
         tokenContract,
         "approve",
-        [CONTRACTS.ROUTER_ADDRESS, MAX_UINT256],
+        [router, MAX_UINT256],
         account,
         gasPrice,
         null,
@@ -105,46 +113,57 @@ export const swap = async (
 
     const deadline = "" + moment().add(600, "seconds").unix();
 
-    const routerContract = new web3.eth.Contract(CONTRACTS.ROUTER_ABI, CONTRACTS.ROUTER_ADDRESS);
+    let routerContract
+    let params
+    let func
+    let sendValue = fromAsset.address === CONTRACTS.FTM_SYMBOL ? sendFromAmount : null
 
-    let func = "swapExactTokensForTokens";
-    let params = [
-      sendFromAmount,
-      sendMinAmountOut,
-      quote.output.routes,
-      account,
-      deadline,
-    ];
-    let sendValue = null;
+    if (encodedData) {
+      params = {
+        to: router,
+        data: encodedData.data
+      }
+    } else {
+      routerContract = new web3.eth.Contract(CONTRACTS.ROUTER_ABI, CONTRACTS.ROUTER_ADDRESS);
 
-    // todo taxable tokens logic, need make universal logic
-    // if (
-    //   fromAsset.address.toLowerCase() ===
-    //   CONTRACTS.SPHERE_ADDRESS.toLowerCase()
-    // ) {
-    //   // SPHERE token address
-    //   func = "swapExactTokensForTokensSupportingFeeOnTransferTokens";
-    // }
-
-    if (fromAsset.address === FTM_SYMBOL) {
-      func = "swapExactETHForTokens";
+      func = "swapExactTokensForTokens";
       params = [
+        sendFromAmount,
         sendMinAmountOut,
         quote.output.routes,
         account,
         deadline,
       ];
-      sendValue = sendFromAmount;
+
+      // todo taxable tokens logic, need make universal logic
+      // if (
+      //   fromAsset.address.toLowerCase() ===
+      //   CONTRACTS.SPHERE_ADDRESS.toLowerCase()
+      // ) {
+      //   // SPHERE token address
+      //   func = "swapExactTokensForTokensSupportingFeeOnTransferTokens";
+      // }
+
+      if (fromAsset.address === FTM_SYMBOL) {
+        func = "swapExactETHForTokens";
+        params = [
+          sendMinAmountOut,
+          quote.output.routes,
+          account,
+          deadline,
+        ];
+        sendValue = sendFromAmount;
+      }
+      // if (toAsset.address === FTM_SYMBOL) {
+      //   func = "swapExactTokensForETH";
+      //   if (
+      //     fromAsset.address.toLowerCase() ===
+      //     CONTRACTS.SPHERE_ADDRESS.toLowerCase()
+      //   ) {
+      //     func = "swapExactTokensForETHSupportingFeeOnTransferTokens";
+      //   }
+      // }
     }
-    // if (toAsset.address === FTM_SYMBOL) {
-    //   func = "swapExactTokensForETH";
-    //   if (
-    //     fromAsset.address.toLowerCase() ===
-    //     CONTRACTS.SPHERE_ADDRESS.toLowerCase()
-    //   ) {
-    //     func = "swapExactTokensForETHSupportingFeeOnTransferTokens";
-    //   }
-    // }
 
     await callContractWait(
       web3,

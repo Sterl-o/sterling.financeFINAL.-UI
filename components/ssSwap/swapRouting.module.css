@@ -1,0 +1,227 @@
+.routeRoot {
+  --rbg: var(--background-dark);
+  --rbg1: #412d2d;
+  --rbg2: #24292D;
+  --rborder: var(--border-dark);
+  --rline: #C6C7C9;
+
+  color: #FFFFFF;
+}
+
+.corneredBorder, .cornered {
+  height: 0;
+  border-bottom-width: 17px;
+  border-bottom-style: solid;
+  border-right: 17px solid transparent;
+}
+
+.corneredBorder {
+  width: 100%;
+  height: 0;
+  position: relative;
+  border-bottom-color: var(--rborder);
+}
+
+.cornered {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: calc(100% + 15px);
+  border-bottom-color: var(--rbg);
+}
+
+.routeContainer {
+  padding: 15px 30px 30px;
+  background-color: var(--rbg);
+  border: 1px solid var(--rborder);
+  border-top: none;
+  position: relative;
+  z-index: 3;
+}
+
+@media (max-width: 470px) {
+  .corneredBorder, .cornered {
+    border-right: none;
+    border-left: 17px solid transparent;
+  }
+
+  .cornered {
+    left: auto;
+    right: 1px;
+  }
+
+  .routeContainer {
+    padding: 15px 20px 20px;
+  }
+}
+
+.routeContainer h2 {
+  font-size: 14px;
+  font-weight: 400;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.routeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.routeFormWrap > div:first-child:before {
+  position: absolute;
+  content: '';
+  top: 50%;
+  left: 0;
+  width: 100%;
+  border-style: dashed;
+  border-color: var(--rline);
+  border-top-width: 1px;
+  z-index: -1;
+}
+
+.routeInputTokenWrapper {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 12px;
+  background-color: var(--rbg1);
+  border: 1px solid var(--rborder);
+  border-radius: 22px;
+  grid-gap: 8px;
+  box-sizing: border-box;
+}
+
+.flexRowReverse {
+  flex-direction: row-reverse;
+}
+
+.routeInputTokenWrapper span {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.routeBody {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.routePath {
+  display: flex;
+  position: relative;
+  padding: 24px 5%;
+}
+
+.routePathMore {
+  border-style: dashed;
+  border-color: var(--rline);
+  border-width: 0 1px;
+}
+
+.routeBody > div:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 46px;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  border-style: dashed;
+  border-color: var(--rline);
+  border-width: 0 1px 1px;
+}
+
+.routeBody > div:not(:last-child):before {
+  border-left-width: 0;
+  border-right-width: 0;
+}
+
+.routePathPercent {
+  display: flex;
+  height: 32px;
+  margin-top: 1px;
+  align-items: center;
+  /*padding-left: 7%;*/
+  /*padding-right: 5%;*/
+  position: relative;
+}
+
+.routePathPercent span {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  display: inline-block;
+  background-color: var(--rbg2);
+  border-radius: 32px;
+  padding: 5px 12px;
+}
+
+.routeHopsWrapper {
+  position: relative;
+  display: flex;
+  flex-grow: 1;
+  overflow-x: hidden;
+}
+
+.routePath > div:before, .routePath > div:after {
+  position: absolute;
+  display: none;
+  content: '';
+  top: 0;
+  left: 0;
+  height: 100%;
+  box-shadow: 0 0 24px 24px var(--rline);
+  z-index: 0;
+}
+
+.routePath > div:after {
+  left: auto;
+  right: 0;
+  z-index: 0;
+}
+
+.routeHopsWrapper .overleft:before {
+  display: block;
+}
+
+.routeHopsWrapper .overright:after {
+  display: block;
+}
+
+.routeHops {
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+  overflow-x: scroll;
+  grid-gap: 16px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.routeHopsSpace {
+  /*justify-content: center;*/
+  justify-content: space-around;
+}
+
+.routeHopsWrapper > div::-webkit-scrollbar {
+  display: none;
+}
+
+.routeHop {
+  display: flex;
+  align-items: center;
+  background-color: var(--rbg2);
+  padding: 5px 12px;
+  border-radius: 34px;
+}
+
+.routeHop a {
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  color: inherit;
+  margin-left: 4px;
+}
