@@ -1,6 +1,150 @@
 [
     {
         "chainId": 42161,
+        "address": "",
+        "name": "",
+        "symbol": "",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0x3b475f6f2f41853706afc9fa6a6b8c5df1a2724c",
+        "name": "Zyber Token",
+        "symbol": "ZYB",
+        "decimals": 18,
+        "logoURI": "https://app.zyberswap.io/_next/image?url=%2Fimages%2Fzyber.png&w=32&q=75"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x7d0c0020285e3762c3dbdc91890d351ec1abd53b",
+        "name": "USDCTest",
+        "symbol": "USDCT",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0xf5a27e55c748bcddbfea5477cb9ae924f0f7fd2e",
+        "name": "Standard Token",
+        "symbol": "TST",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0xc3d392a6735d304b17bfca1eafb0db10d30a6f3a",
+        "name": "STERTest",
+        "symbol": "STERT",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0xb261104a83887ae92392fb5ce5899fcfe5481456",
+        "name": "NFTEarth",
+        "symbol": "NFTE",
+        "decimals": 18,
+        "logoURI": "https://assets.coingecko.com/coins/images/29116/small/20230223_224134.jpg?1677224110"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x3db4b7da67dd5af61cb9b3c70501b1bdb24b2c22",
+        "name": "gmdUSDC",
+        "symbol": "gmdUSDC",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0xd85e038593d7a098614721eae955ec2022b9b91b",
+        "name": "Gains Network DAI",
+        "symbol": "gDAI",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0x0Fb3E4E84FB78C93E466a2117Be7bc8BC063E430",
+        "name": "Champion",
+        "symbol": "CHAM",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0x8ba902004a480136dac5fbe162d21c97d49d0242",
+        "name": "ArbRise ",
+        "symbol": "AR",
+        "decimals": 18,
+        "logoURI": ""
+    },
+    {
+        "chainId": 42161,
+        "address": "0x155f0DD04424939368972f4e1838687d6a831151",
+        "name": "ArbiDoge",
+        "symbol": "ADoge",
+        "decimals": 18,
+        "logoURI": "https://s2.coinmarketcap.com/static/img/coins/64x64/11878.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0xaae0c3856e665ff9b3e2872b6d75939d810b7e40",
+        "name": "YieldFarming Index",
+        "symbol": "YFX",
+        "decimals": 18,
+        "logoURI": "https://cdn.discordapp.com/attachments/1080253146732965950/1080744981167345664/l1v2_transparent.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0xec13336bbd50790a00cdc0feddf11287eaf92529",
+        "name": "gmUSD",
+        "symbol": "gmUSD",
+        "decimals": 18,
+        "logoURI": "https://cdn.discordapp.com/attachments/1080253146732965950/1080744904042479678/2.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x03e8d118a1864c7dc53bf91e007ab7d91f5a06fa",
+        "name": "Liquid Driver",
+        "symbol": "LQDR",
+        "decimals": 18,
+        "logoURI": "https://www.liquiddriver.finance/img/token/LQDR.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0xe80772Eaf6e2E18B651F160Bc9158b2A5caFCA65",
+        "name": "USD+",
+        "symbol": "USD+",
+        "decimals": 6,
+        "logoURI": "https://app.dyson.money/static/media/USD+.eef6ce05070a12f1218d3df1e5d23f6c.svg"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x813fFCC4Af3e810E6b447235cC88A02f00454453",
+        "name": "ETS Gamma",
+        "symbol": "ETS Gamma",
+        "decimals": 6,
+        "logoURI": "https://app.overnight.fi/img/ets_gamma_sl_weth_usdc.3619d7d2.svg"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x6688b00f0c23a4a546BEaAE51a7c90C439895D48",
+        "name": "Tarot",
+        "symbol": "TAROT",
+        "decimals": 18,
+        "logoURI": "https://www.tarot.to/assets/images/token-icons/0xC5e2B037D30a390e62180970B3aa4E91868764cD.png"
+    },
+    {
+        "chainId": 42161,
+        "address": "0x3b443e9b9b7f340c7b1417abfdc64132341873d4",
+        "name": "Sphere veSTR Staker",
+        "symbol": "spSTR",
+        "decimals": 18,
+        "logoURI": "https://app.dyson.money/static/media/spSTR.406465100872c2fcef1a.png"
+    },
+    {
+        "chainId": 42161,
         "address": "0x7cb16cb78ea464aD35c8a50ABF95dff3c9e09d5d",
         "name": "0xBitcoin Token",
         "symbol": "0xBTC",
