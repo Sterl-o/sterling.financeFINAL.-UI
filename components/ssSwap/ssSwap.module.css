@@ -45,6 +45,11 @@ input[type=number].massiveInputAmount {
   color: #FFFFFF !important;
 }
 
+.amountInUSD {
+  color: #7C838A;
+  margin-left: 8px;
+}
+
 .swapInputsWrapper {
   max-width: 463px;
   margin-left: 0;

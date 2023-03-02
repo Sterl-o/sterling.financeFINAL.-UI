@@ -260,7 +260,7 @@ export const quoteSwap = async (
       return null;
     }
 
-    let priceImpact = '0'
+    let priceImpact = null
     if (!bestAmountOut.firebirdQuote) {
       const libraryContract = new web3.eth.Contract(
         CONTRACTS.LIBRARY_ABI,

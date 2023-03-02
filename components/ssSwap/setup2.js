@@ -118,7 +118,6 @@ function Setup() {
     const [hintAnchor, setHintAnchor] = React.useState(null);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [, setFetchCounter] = useState(0);
-    const [showInverted, setShowInverted] = useState(false);
 
     const { appTheme } = useAppThemeContext();
     const account = useAccount();
@@ -1019,6 +1018,14 @@ function Setup() {
         );
     };
 
+    const getAmountInUSD = useCallback((value, price) => {
+        if (value && price) {
+            const num = new BigNumber(value).multipliedBy(price)
+            return num.gt(0.01) ? `~$${formatCurrency(num.toFixed(), 2)}` : '< $0.01'
+        }
+        return null
+    }, [])
+
     const renderMassiveInput = (
         type,
         amountValue,
@@ -1027,7 +1034,8 @@ function Setup() {
         assetValue,
         assetError,
         assetOptions,
-        onAssetSelect
+        onAssetSelect,
+        amountInUSDText,
     ) => {
 
         return (
@@ -1119,6 +1127,10 @@ function Setup() {
                         ].join(" ")}
                     >
                         {assetValue?.symbol}
+
+                        {amountInUSDText ? (
+                          <small className={classes.amountInUSD}>{amountInUSDText}</small>
+                        ) : null}
                     </Typography>
                 </div>
             </div>
@@ -1147,15 +1159,7 @@ function Setup() {
         setSwapIconArrowColor(null);
     };
 
-    const onWrap = () => {
-        if (
-            !fromAmountValue ||
-            fromAmountValue > Number(fromAssetValue.balance) ||
-            Number(fromAmountValue) <= 0
-        ) {
-            return;
-        }
-
+    const validateForm = () => {
         setFromAmountError(false);
         setFromAssetError(false);
         setToAssetError(false);
@@ -1167,9 +1171,9 @@ function Setup() {
             error = true;
         } else {
             if (
-                !fromAssetValue.balance ||
-                isNaN(fromAssetValue.balance) ||
-                BigNumber(fromAssetValue.balance).lte(0)
+              !fromAssetValue.balance ||
+              isNaN(fromAssetValue.balance) ||
+              BigNumber(fromAssetValue.balance).lte(0)
             ) {
                 setFromAmountError("Invalid balance");
                 error = true;
@@ -1177,8 +1181,8 @@ function Setup() {
                 setFromAmountError("Invalid amount");
                 error = true;
             } else if (
-                fromAssetValue &&
-                BigNumber(fromAmountValue).gt(fromAssetValue.balance)
+              fromAssetValue &&
+              BigNumber(fromAmountValue).gt(fromAssetValue.balance)
             ) {
                 setFromAmountError(`Greater than your available balance`);
                 error = true;
@@ -1194,6 +1198,20 @@ function Setup() {
             setFromAssetError("To asset is required");
             error = true;
         }
+
+        return error
+    }
+
+    const onWrap = () => {
+        if (
+          !fromAmountValue ||
+          fromAmountValue > Number(fromAssetValue.balance) ||
+          Number(fromAmountValue) <= 0
+        ) {
+            return;
+        }
+
+        const error = validateForm();
 
         if (!error) {
             setLoading(true);
@@ -1220,44 +1238,7 @@ function Setup() {
             return;
         }
 
-        setFromAmountError(false);
-        setFromAssetError(false);
-        setToAssetError(false);
-
-        let error = false;
-
-        if (!fromAmountValue || fromAmountValue === "" || isNaN(fromAmountValue)) {
-            setFromAmountError("From amount is required");
-            error = true;
-        } else {
-            if (
-                !fromAssetValue.balance ||
-                isNaN(fromAssetValue.balance) ||
-                BigNumber(fromAssetValue.balance).lte(0)
-            ) {
-                setFromAmountError("Invalid balance");
-                error = true;
-            } else if (BigNumber(fromAmountValue).lt(0)) {
-                setFromAmountError("Invalid amount");
-                error = true;
-            } else if (
-                fromAssetValue &&
-                BigNumber(fromAmountValue).gt(fromAssetValue.balance)
-            ) {
-                setFromAmountError(`Greater than your available balance`);
-                error = true;
-            }
-        }
-
-        if (!fromAssetValue || fromAssetValue === null) {
-            setFromAssetError("From asset is required");
-            error = true;
-        }
-
-        if (!toAssetValue || toAssetValue === null) {
-            setFromAssetError("To asset is required");
-            error = true;
-        }
+        const error = validateForm();
 
         if (!error) {
             setLoading(true);
@@ -1357,7 +1338,8 @@ function Setup() {
                                                 ? fromAssetOptions
                                                 : fromAssetOptions
                                                   .filter(a => DIRECT_SWAP_ROUTES[toAssetValue?.address.toLowerCase()] === a.address.toLowerCase()),
-                                              onAssetSelect
+                                              onAssetSelect,
+                                              getAmountInUSD(fromAmountValue, quote?.inputs?.fromPrice),
                                             )}
 
                                             {fromAssetError && (
@@ -1523,7 +1505,8 @@ function Setup() {
                                                 ? toAssetOptions
                                                 : toAssetOptions
                                                   .filter(a => DIRECT_SWAP_ROUTES[fromAssetValue?.address.toLowerCase()] === a.address.toLowerCase()),
-                                              onAssetSelect
+                                              onAssetSelect,
+                                              getAmountInUSD(toAmountValue, quote?.inputs?.toPrice)
                                             )}
 
                                             {renderSmallInput(
@@ -1761,10 +1744,7 @@ function Setup() {
                                 {!quoteError && !quoteLoading && !!quote ? (
                                   <SwapDetails
                                     quote={quote}
-                                    fromAssetValue={fromAssetValue}
                                     toAssetValue={toAssetValue}
-                                    showInverted={showInverted}
-                                    setShowInverted={setShowInverted}
                                     slippage={slippage}
                                   />
                                 ) : null}

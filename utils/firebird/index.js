@@ -37,7 +37,7 @@ function getHeaders() {
     'content-type': 'application/json',
     'x-request-id': uid,
     'api-h': h,
-    'api-key': 'firebird_sterling_prod',
+    'api-key': 'firebird_sterling_prod_1056',
     'api-timestamp': timestamp
   }
 }
