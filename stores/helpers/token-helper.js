@@ -1,4 +1,4 @@
-import DEFAULT_TOKEN_LIST from '../constants/tokenlist.json'
+import DEFAULT_TOKEN_LIST from "../constants/tokenlist.json";
 import {
   BASE_ASSETS_WHITELIST,
   BLACK_LIST_TOKENS,
@@ -6,19 +6,18 @@ import {
   QUERIES,
   RENAME_ASSETS,
   NETWORK_TOKEN_NAME,
-  ALLOWED_DUPLICATE_SYMBOLS
+  ALLOWED_DUPLICATE_SYMBOLS,
 } from "../constants";
-import {formatBN, removeDuplicate} from '../../utils';
-import {getLocalAssets} from "./local-storage-helper";
-import {createClient} from "urql";
+import { formatBN, removeDuplicate } from "../../utils";
+import { getLocalAssets } from "./local-storage-helper";
+import { createClient } from "urql";
+import { addressBook } from "blockchain-addressbook";
+const { arbitrum: arbitrumAddressBook } = addressBook;
 
-const client = createClient({url: process.env.NEXT_PUBLIC_API});
+const client = createClient({ url: process.env.NEXT_PUBLIC_API });
 
 export function getTokenContract(web3, address) {
-  return new web3.eth.Contract(
-    CONTRACTS.ERC20_ABI,
-    address
-  );
+  return new web3.eth.Contract(CONTRACTS.ERC20_ABI, address);
 }
 
 export function isNetworkToken(tokenAdr) {
@@ -26,7 +25,9 @@ export function isNetworkToken(tokenAdr) {
 }
 
 export async function getEthPrice() {
-  return parseFloat((await client.query(QUERIES.bundleQuery).toPromise()).data.bundle.ethPrice);
+  return parseFloat(
+    (await client.query(QUERIES.bundleQuery).toPromise()).data.bundle.ethPrice
+  );
 }
 
 export async function getTokenBalance(tokenAdr, web3, accountAdr, decimals) {
@@ -34,18 +35,31 @@ export async function getTokenBalance(tokenAdr, web3, accountAdr, decimals) {
     return "0";
   }
   try {
-    return formatBN(await getTokenContract(web3, tokenAdr).methods.balanceOf(accountAdr).call(), decimals);
+    return formatBN(
+      await getTokenContract(web3, tokenAdr)
+        .methods.balanceOf(accountAdr)
+        .call(),
+      decimals
+    );
   } catch (e) {
-    console.log("Error get balance", tokenAdr, accountAdr, e)
+    console.log("Error get balance", tokenAdr, accountAdr, e);
     return "0";
   }
 }
 
-export async function getOrCreateBaseAsset(baseAssets, token, web3, account, getBalance) {
+export async function getOrCreateBaseAsset(
+  baseAssets,
+  token,
+  web3,
+  account,
+  getBalance
+) {
   if (!token || !web3 || !account) {
     return null;
   }
-  const theBaseAsset = baseAssets.filter(as => as?.address?.toLowerCase() === token?.toLowerCase()).reduce((a, b) => b, null);
+  const theBaseAsset = baseAssets
+    .filter((as) => as?.address?.toLowerCase() === token?.toLowerCase())
+    .reduce((a, b) => b, null);
   if (theBaseAsset !== null) {
     return theBaseAsset;
   }
@@ -62,14 +76,23 @@ export const createBaseAsset = async (address, web3, account, getBalance) => {
       baseAssetContract.methods.name().call(),
     ]);
 
+    const logoURI =
+      arbitrumAddressBook.tokens[symbol]?.logoURI.replace("%20", " ") | null;
+    console.log({
+      symbol,
+      logoURI,
+      tokens: arbitrumAddressBook.tokens,
+    });
     return {
       address: address,
       symbol: symbol,
       name: name,
       decimals: parseInt(decimals),
-      logoURI: null,
+      logoURI: logoURI,
       local: true,
-      balance: getBalance ? await getTokenBalance(address, web3, account, decimals) : null
+      balance: getBalance
+        ? await getTokenBalance(address, web3, account, decimals)
+        : null,
     };
   } catch (ex) {
     console.log("Create base asset error", ex);
@@ -81,7 +104,7 @@ async function getTokenList() {
   if (parseInt(process.env.NEXT_PUBLIC_CHAINID) === 80001) {
     // some test token list
   } else {
-    return {data: {tokens: DEFAULT_TOKEN_LIST,},}
+    return { data: { tokens: DEFAULT_TOKEN_LIST } };
   }
 }
 
@@ -100,21 +123,26 @@ export const getBaseAssets = async () => {
     let baseAssets = await getTokensFromSubgraph();
     const defaultTokenList = await getTokenList();
 
-
     for (let i = 0; i < baseAssets.length; i++) {
       const baseAsset = baseAssets[i];
 
-      const tokenInfo = defaultTokenList.data.tokens.filter(t => t?.address?.toLowerCase() === baseAsset?.id?.toLowerCase())[0];
-      baseAsset.address = baseAsset.id
-      baseAsset.balance = 0
-      baseAsset.chainId = 0
+      const tokenInfo = defaultTokenList.data.tokens.filter(
+        (t) => t?.address?.toLowerCase() === baseAsset?.id?.toLowerCase()
+      )[0];
 
-      if (!!tokenInfo) {
+      baseAsset.address = baseAsset.id;
+      baseAsset.balance = 0;
+      baseAsset.chainId = 0;
+
+      if (!!tokenInfo && !baseAsset.logoURI) {
         baseAsset.logoURI = tokenInfo.logoURI;
       }
 
-      if (baseAsset.address.toLowerCase() === CONTRACTS.GOV_TOKEN_ADDRESS.toLowerCase()) {
-        baseAsset.logoURI = CONTRACTS.GOV_TOKEN_LOGO
+      if (
+        baseAsset.address.toLowerCase() ===
+        CONTRACTS.GOV_TOKEN_ADDRESS.toLowerCase()
+      ) {
+        baseAsset.logoURI = CONTRACTS.GOV_TOKEN_LOGO;
       }
 
       if (RENAME_ASSETS[baseAsset.name]) {
@@ -136,35 +164,41 @@ export const getBaseAssets = async () => {
 
     let localBaseAssets = getLocalAssets();
 
-    baseAssets = baseAssets
-      .filter((token) => BLACK_LIST_TOKENS.indexOf(token.id?.toLowerCase()) === -1);
+    baseAssets = baseAssets.filter(
+      (token) => BLACK_LIST_TOKENS.indexOf(token.id?.toLowerCase()) === -1
+    );
 
     let dupAssets = [];
     baseAssets.forEach((token, id) => {
       BASE_ASSETS_WHITELIST.forEach((wl) => {
         if (
-            token.id?.toLowerCase() !== wl.address?.toLowerCase()
-            && wl.symbol?.toLowerCase() === token.symbol?.toLowerCase()
-            && !ALLOWED_DUPLICATE_SYMBOLS.includes(token.symbol)
+          token.id?.toLowerCase() !== wl.address?.toLowerCase() &&
+          wl.symbol?.toLowerCase() === token.symbol?.toLowerCase() &&
+          !ALLOWED_DUPLICATE_SYMBOLS.includes(token.symbol)
         ) {
           dupAssets.push(id);
         }
       });
     });
 
-    for (let i = dupAssets.length - 1; i >= 0; i--){
+    for (let i = dupAssets.length - 1; i >= 0; i--) {
       baseAssets.splice(dupAssets[i], 1);
     }
 
     const result = removeDuplicate([...localBaseAssets, ...baseAssets]);
-    return result.map(asset => Object.assign({}, asset));
+    return result.map((asset) => Object.assign({}, asset));
   } catch (ex) {
     console.log("Error load base assets", ex);
     throw ex;
   }
 };
 
-export const getBalancesForBaseAssets = async (web3, account, baseAssets, multicall) => {
+export const getBalancesForBaseAssets = async (
+  web3,
+  account,
+  baseAssets,
+  multicall
+) => {
   if (!web3 || !account || !baseAssets || !multicall) {
     return;
   }
@@ -178,14 +212,16 @@ export const getBalancesForBaseAssets = async (web3, account, baseAssets, multic
         continue;
       }
 
-      batch.push(getTokenContract(web3, asset.address).methods.balanceOf(account))
-      tokens.push(asset.address)
+      batch.push(
+        getTokenContract(web3, asset.address).methods.balanceOf(account)
+      );
+      tokens.push(asset.address);
       if (batch.length > 30) {
         const results = await multicall.aggregate(batch);
         tokens.forEach((token, i) => {
-          const a = baseAssets.filter(a => a.address === token)[0]
+          const a = baseAssets.filter((a) => a.address === token)[0];
           a.balance = formatBN(results[i], a.decimals);
-        })
+        });
         batch = [];
         tokens = [];
       }
@@ -193,9 +229,9 @@ export const getBalancesForBaseAssets = async (web3, account, baseAssets, multic
 
     const results = await multicall.aggregate(batch);
     tokens.forEach((token, i) => {
-      const a = baseAssets.filter(a => a.address === token)[0]
+      const a = baseAssets.filter((a) => a.address === token)[0];
       a.balance = formatBN(results[i], a.decimals);
-    })
+    });
   } catch (ex) {
     console.log("Get base asset info error", ex);
     throw ex;
@@ -216,6 +252,8 @@ export const getTokenAllowance = async (web3, token, account, spender) => {
 };
 
 export function enrichLogoUri(baseAssets, tokenModel) {
-  const asset = baseAssets.filter(a => a.id.toLowerCase() === tokenModel.id.toLowerCase())[0]
+  const asset = baseAssets.filter(
+    (a) => a.id.toLowerCase() === tokenModel.id.toLowerCase()
+  )[0];
   tokenModel.logoURI = asset?.logoURI;
 }
