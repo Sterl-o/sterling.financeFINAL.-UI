@@ -51,6 +51,18 @@ export const loadNfts = async (account, web3, tokenID) => {
 };
 
 export async function getVeApr() {
+
+  return {
+    "data": {
+      "veDistEntities": [
+        {
+          "apr": "0.0",
+          "__typename": "VeDistEntity"
+        }
+      ]
+    }
+  };
+
   try {
     const veDistResponse = await client.query(QUERIES.veDistQuery).toPromise();
     if (!veDistResponse.error && veDistResponse.data.veDistEntities.length !== 0) {
