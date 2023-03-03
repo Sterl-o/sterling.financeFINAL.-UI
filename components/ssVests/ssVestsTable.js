@@ -612,15 +612,15 @@ const EnhancedTableToolbar = (props) => {
           </Typography>
         </div>
 
-        <div
-          className={[classes.addButton, classes[`addButton--${appTheme}`]].join(' ')}
-        >
-          <Typography
-            className={[classes.actionButtonText, classes[`actionButtonText--${appTheme}`]].join(' ')}
-          >
-            NFT APR: {parseInt(props.veToken?.veDistApr)}%
-          </Typography>
-        </div>
+        {/*<div*/}
+        {/*  className={[classes.addButton, classes[`addButton--${appTheme}`]].join(' ')}*/}
+        {/*>*/}
+        {/*  <Typography*/}
+        {/*    className={[classes.actionButtonText, classes[`actionButtonText--${appTheme}`]].join(' ')}*/}
+        {/*  >*/}
+        {/*    NFT APR: {parseInt(props.veToken?.veDistApr)}%*/}
+        {/*  </Typography>*/}
+        {/*</div>*/}
       </div>
 
       {windowWidth <= 660 && (
