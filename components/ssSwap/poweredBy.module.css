@@ -4,7 +4,7 @@
   color: #DBE6EC;
   font-weight: 500;
   margin-top: 12px;
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .externalLink {
@@ -12,7 +12,8 @@
   align-items: center;
   text-decoration: none;
   margin-left: 8px;
-  color: inherit;
+  color: #FFFFFF;
+  font-weight: 600;
 }
 
 .externalLink img {
