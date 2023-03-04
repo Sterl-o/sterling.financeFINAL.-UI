@@ -137,7 +137,7 @@ function Setup() {
     });
 
     useEffect(() => {
-        multiSwapStore._fetchData()
+        // multiSwapStore._fetchData()
     }, [])
 
     useEffect(
@@ -178,6 +178,7 @@ function Setup() {
                     setToAmountValue(BigNumber(val.output.finalValue).toFixed(8));
                     // console.log('setquote')
                     setQuote(val);
+                    multiSwapStore.setSwapQuote(val);
                 }
             };
 
@@ -1189,12 +1190,12 @@ function Setup() {
             }
         }
 
-        if (!fromAssetValue || fromAssetValue === null) {
+        if (!fromAssetValue) {
             setFromAssetError("From asset is required");
             error = true;
         }
 
-        if (!toAssetValue || toAssetValue === null) {
+        if (!toAssetValue) {
             setFromAssetError("To asset is required");
             error = true;
         }
@@ -1257,6 +1258,34 @@ function Setup() {
         }
     };
 
+    const onSwap = () => {
+        if (
+          !fromAmountValue ||
+          fromAmountValue > Number(fromAssetValue.balance) ||
+          Number(fromAmountValue) <= 0
+        ) {
+            return;
+        }
+
+        const error = validateForm();
+
+        if (!error) {
+            setLoading(true);
+
+            stores.dispatcher.dispatch({
+                type: ACTIONS.SWAP,
+                content: {
+                    fromAsset: fromAssetValue,
+                    toAsset: toAssetValue,
+                    fromAmount: fromAmountValue,
+                    toAmount: toAmountValue,
+                    quote: quote,
+                    slippage: slippage,
+                },
+            });
+        }
+    };
+
     return (
         <MultiSwap>
             {(renderProps) => {
@@ -1268,7 +1297,7 @@ function Setup() {
                     allowed, isFetchingAllowance,
                     swap, isFetchingSwapQuery,
                     /*doApprove,*/ isFetchingApprove,
-                    doSwap, isFetchingSwap,
+                    /*doSwap,*/ isFetchingSwap,
                     multiswapData,
                     routes,
                 } = renderProps
@@ -1277,7 +1306,7 @@ function Setup() {
 
                 let buttonLabel = 'Swap'
                 let loadingMessage = ''
-                let handleClickButton = doSwap
+                let handleClickButton = onSwap // doSwap
                 let disableButton = isFetchingAllowance
                     || isFetchingSwapQuery
                     || isFetchingApprove
