@@ -1146,9 +1146,9 @@ export default function EnhancedTable({
                                 >
                                   {tableCellContent(
                                       `${formatCurrency(BigNumber(row?.gauge?.apr), 0)}%`,
-                                      `${formatCurrency(BigNumber(row?.gauge?.expectAPR), 0)}%`,
-                                      'Current',
-                                      'Expected'
+                                      // `${formatCurrency(BigNumber(row?.gauge?.expectAPR), 0)}%`,
+                                      // 'Current',
+                                      // 'Expected'
                                   )}
                                 </TableCell>
 
