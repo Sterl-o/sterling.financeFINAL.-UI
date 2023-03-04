@@ -21,7 +21,7 @@ export default function SwapDetails({ quote, toAssetValue, slippage }) {
     return new BigNumber(quote.output.finalValue)
       .times(100 - parseFloat(slippage))
       .div(100)
-      .toFixed(toAssetValue.decimals, BigNumber.ROUND_DOWN)
+      .toFixed(parseInt(toAssetValue.decimals), BigNumber.ROUND_DOWN)
   }, [quote, toAssetValue, slippage])
 
   return (

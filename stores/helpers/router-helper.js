@@ -260,8 +260,17 @@ export const quoteSwap = async (
       return null;
     }
 
-    let priceImpact = null
-    if (!bestAmountOut.firebirdQuote) {
+    let priceImpact = null;
+    if (bestAmountOut.firebirdQuote) {
+      if (fromPrice && toPrice) {
+        const inputInUSD = amountIn.multipliedBy(fromPrice);
+        const outputInUSD = new BigNumber(totalOut).div(10 ** toDecimals).multipliedBy(toPrice);
+        const diff = outputInUSD.div(inputInUSD).minus(1);
+        if (diff.lt(0)) {
+          priceImpact = diff.abs().times(100).toFixed(18);
+        }
+      }
+    } else {
       const libraryContract = new web3.eth.Contract(
         CONTRACTS.LIBRARY_ABI,
         CONTRACTS.LIBRARY_ADDRESS

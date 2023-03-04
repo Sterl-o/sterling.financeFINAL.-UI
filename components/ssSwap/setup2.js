@@ -1552,7 +1552,6 @@ function Setup() {
                                                 && multiSwapStore.error === null
                                                 && multiSwapStore.priceImpact !== null
                                                 && !multiSwapStore.isWrapUnwrap
-                                                && !quote?.output?.firebirdQuote
                                               )
                                               && (
                                                 <>
