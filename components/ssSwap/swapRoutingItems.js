@@ -18,9 +18,17 @@ function getLogoURL(address) {
 export function RouteInput({ right = false, token, amount }) {
   return (
     <div className={`${classes.routeInputTokenWrapper} ${right ? classes.flexRowReverse : ''}`}>
+      <div className={classes.squareCorner}>
+        <span />
+      </div>
+
       <CurrencyLogo src={token?.logoURI || getLogoURL(token?.address)} width={20} height={20} />
 
       {token ? <span>{`${formatCurrency(amount)} ${token.symbol}`}</span> : null}
+
+      <div className={`${classes.squareCorner} ${classes.squareCornerInverted}`}>
+        <span />
+      </div>
     </div>
   )
 }
@@ -36,7 +44,15 @@ export function PathPercent({ value, totalPath }) {
 
   return (
     <div className={classes.routePathPercent}>
-      <span>{totalPath === 1 ? '100%' : `${percent}%`}</span>
+      <div className={classes.squareCorner}>
+        <span />
+      </div>
+
+      <span className={classes.percentValue}>{totalPath === 1 ? '100%' : `${percent}%`}</span>
+
+      <div className={`${classes.squareCorner} ${classes.squareCornerInverted}`}>
+        <span />
+      </div>
     </div>
   )
 }
@@ -44,6 +60,10 @@ export function PathPercent({ value, totalPath }) {
 export function HopItem({ token, ...props }) {
   return (
     <div className={classes.routeHop} {...props}>
+      <div className={classes.squareCorner}>
+        <span />
+      </div>
+
       <CurrencyLogo src={getLogoURL(token.address)} width={24} height={24} />
 
       <a
@@ -52,6 +72,10 @@ export function HopItem({ token, ...props }) {
       >
         {token.symbol}
       </a>
+
+      <div className={`${classes.squareCorner} ${classes.squareCornerInverted}`}>
+        <span />
+      </div>
     </div>
   )
 }

@@ -54,11 +54,13 @@ export default function SwapRouting({ quote, fromAsset, toAsset }) {
 
   return (
     <div className={classes.routeRoot}>
-      <div className={classes.corneredBorder}>
-        <div className={classes.cornered} />
+      <div className={classes.rootCorner}>
+        <span />
+        <span />
       </div>
 
       <div className={classes.routeContainer}>
+        <div className={classes.bgRouteContainer} />
         <h2>Routing</h2>
 
         <div className={!!quote?.inputs?.wrapType ? classes.routeFormWrap : ''}>
@@ -69,6 +71,11 @@ export default function SwapRouting({ quote, fromAsset, toAsset }) {
 
           {data.routes?.length ? <DrawRouting data={data} /> : null}
         </div>
+      </div>
+
+      <div className={classes.rootCornerInverted}>
+        <span />
+        <span />
       </div>
     </div>
   )
