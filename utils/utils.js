@@ -268,7 +268,7 @@ export const removeDuplicate = (arr) => {
 export function buildRoutes(routeAssets, addy0, addy1, directRoute) {
   let result = []
 
-  if (!directRoute) {
+  if (!directRoute && routeAssets) {
     result = routeAssets
         .map((routeAsset) => {
 

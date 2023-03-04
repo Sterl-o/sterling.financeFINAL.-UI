@@ -12,6 +12,19 @@ input[type=number].massiveInputAmount {
   -moz-appearance: textfield;
 }
 
+.swapContainer {
+  width: 1130px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.swapGrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  grid-gap: 32px;
+}
+
 .smallerText {
   position: absolute !important;
   left: 151px;
@@ -32,9 +45,38 @@ input[type=number].massiveInputAmount {
   color: #FFFFFF !important;
 }
 
+.amountInUSD {
+  color: #7C838A;
+  margin-left: 8px;
+}
+
+.swapInputsWrapper {
+  max-width: 463px;
+  margin-left: 0;
+  position: relative;
+}
+
+.swapInputsForm {
+  width: 100%;
+}
+
 .swapInputs {
   display: flex;
   flex-direction: column;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .swapGrid {
+    flex-direction: row-reverse;
+    align-items: flex-start;
+  }
+  .swapInputsWrapper {
+    grid-gap: 64px;
+  }
+}
+
+.swapRouting {
   width: 100%;
 }
 
@@ -946,6 +988,10 @@ input[type=number].massiveInputAmount {
 
   .swapInputs {
     align-items: center;
+  }
+
+  .swapInputsForm {
+    padding-bottom: 80px;
   }
 
   .inputBalanceText {

@@ -11,7 +11,7 @@ export const callContractWait = async (
   web3,
   contract,
   method,
-  params,
+  params, // contract ? Array<any> : { to: string, data: string }
   account,
   gasPrice,
   dispatchEvent,
@@ -25,8 +25,16 @@ export const callContractWait = async (
 ) => {
   emitNotificationPending(emitter, uuid)
 
-  await contract.methods[method](...params)
-    .estimateGas({from: account, value: sendValue ?? 0})
+  const provider = contract ? contract.methods[method](...params) : web3.eth
+  const sendTx = contract ? provider.send : provider.sendTransaction
+  const transaction = {
+    ...(contract ? {} : params),
+    from: account,
+    value: sendValue || 0,
+  }
+
+  await provider
+    .estimateGas(transaction)
     .then(async (gasAmount) => {
 
       console.log("Web3Helper", gasPrice, gasAmount, BigNumber(gasPrice).times(GAS_MULTIPLIER).toFixed(0), BigNumber(gasAmount).times(1.5).toFixed(0))
@@ -36,12 +44,13 @@ export const callContractWait = async (
 
       console.log('callContractWait', method, params, account, sendGasPrice, sendValue);
 
-      await contract.methods[method](...params)
-        .send({
-          from: account,
+      await sendTx(
+        {
+          ...transaction,
+          // from: account,
           gasPrice: web3.utils.toWei(sendGasPrice, "gwei"),
           // gas: sendGasAmount,
-          value: sendValue ?? 0,
+          // value: sendValue ?? 0,
           maxPriorityFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
           maxFeePerGas: web3.utils.toWei(gasPrice, "gwei"),
         })
@@ -76,7 +85,7 @@ export const callContractWait = async (
         });
     })
     .catch((ex) => {
-      console.log("Call tx error", contract._address, method, params, ex);
+      console.log("Call tx error", contract?._address, method, params, ex);
       if (ex.message) {
         emitNotificationRejected(emitter, uuid, ex.message)
         return callback(ex.message);

@@ -649,7 +649,8 @@ class Store {
         await this.getWeb3(),
         this.getStore("routeAssets"),
         this.emitter,
-        this.getStore("baseAssets")
+        this.getStore("baseAssets"),
+        stores.accountStore.getStore("account")
     )
   };
 

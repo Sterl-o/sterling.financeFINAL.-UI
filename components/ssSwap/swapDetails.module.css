@@ -1,0 +1,41 @@
+.wrapper {
+  background-color: #151718;
+  padding: 30px;
+  margin-top: 30px;
+  color: #FFFFFF;
+  border: 1px solid var(--border-dark);
+}
+
+@media (max-width: 470px) {
+  .wrapper {
+    padding: 20px;
+    margin-top: 26px;
+  }
+}
+
+.container {
+  display: grid;
+  gap: 16px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.item > div {
+  display: flex;
+  align-self: center;
+  gap: 4px;
+}
+
+.item > div:first-child {
+  color: #7C838A;
+}
+
+.iconButton {
+  display: inline-flex;
+  cursor: pointer;
+}

@@ -438,9 +438,111 @@ class MultiSwapStore {
   }
 
   async _swapQuery() {
-    // if (!this.swapQueryInProgress) {
-    console.log(">>> SWAP QUERY");
-    this.swapQueryInProgress = true;
+    // // if (!this.swapQueryInProgress) {
+    // console.log(">>> SWAP QUERY");
+    // this.swapQueryInProgress = true;
+    // if (this.isWrapUnwrap) {
+    //   this.allowed = true;
+    //   const returnAmount = ethers.utils
+    //     .parseUnits(this.swapAmount ?? "0", 18)
+    //     .toString();
+    //   this.swap = { returnAmount };
+    //   this.swapQueryInProgress = false;
+    //   return;
+    // }
+    //
+    // if (this.tokenIn === FTM_SYMBOL) {
+    //   this.allowed = true;
+    // }
+    //
+    // if (this.tokenIn && this.tokenOut && this.swapAmount && this.provider) {
+    //   const [tokenIn, tokenOut] = await Promise.all([
+    //     this._getToken(this.tokenIn),
+    //     this._getToken(this.tokenOut),
+    //   ]);
+    //   // console.log('tokenIn', JSON.parse(JSON.stringify(this.tokenIn)))
+    //   const swapAmount = ethers.utils
+    //     .parseUnits(this.swapAmount, tokenIn.decimals)
+    //     .toString();
+    //   this.isFetchingSwapQuery = true;
+    //
+    //   // query old router for direct swap routes
+    //   if (this.isDirectRoute || this.isMultiswapInclude) {
+    //     const [rawFromAsset, rawToAsset] = await Promise.all([
+    //       this.tokenIn === FTM_SYMBOL ? this._getToken(this.tokenIn, false) : Promise.resolve(null),
+    //       this.tokenOut === FTM_SYMBOL ? this._getToken(this.tokenOut, false) : Promise.resolve(null),
+    //     ])
+    //
+    //     const response = await stores.stableSwapStore.quoteSwap({
+    //       content: {
+    //         fromAsset: tokenIn,
+    //         toAsset: tokenOut,
+    //         rawFromAsset,
+    //         rawToAsset,
+    //         fromAmount: this.swapAmount,
+    //       },
+    //     });
+    //
+    //     // console.log('directSwapRoute old router response', response)
+    //
+    //     if (response === null) {
+    //       this.swap = null;
+    //       this.error = "Swap query request error. Try again.";
+    //     }
+    //
+    //     if (
+    //       response?.output?.finalValue &&
+    //       this.swapAmount === response.inputs.fromAmount
+    //     ) {
+    //       // console.log('_swapQuery response', response)
+    //       this.swap = {
+    //         returnAmount: response.output.receiveAmounts[1],
+    //         priceImpact: response.priceImpact,
+    //         swapAmount: response.output.receiveAmounts[0],
+    //         tokenAddresses: [this.tokenIn, this.tokenOut],
+    //         swaps: [
+    //           {
+    //             poolId:
+    //               "0x421a018cc5839c4c0300afb21c725776dc389b1addddddddddddddddddddddd0",
+    //             assetInIndex: 0,
+    //             assetOutIndex: 1,
+    //             amount: response.output.receiveAmounts[0],
+    //           },
+    //         ],
+    //         quote: response,
+    //       };
+    //       this.priceInfo = this.calcPriceInfo(tokenIn, tokenOut, this.swap);
+    //       this.priceImpact = this.swap.priceImpact;
+    //     }
+    //
+    //     this.isFetchingSwapQuery = false;
+    //   } else {
+    //     try {
+    //       const response = await swapQuery(
+    //         tokenIn,
+    //         tokenOut,
+    //         swapAmount,
+    //         this.excludePlatforms
+    //       );
+    //       this.swap = response;
+    //       // console.log(this.swap)
+    //       this.priceInfo = this.calcPriceInfo(tokenIn, tokenOut, response);
+    //       this.priceImpact = this.swap.priceImpact * 100;
+    //       if (this.swap?.swaps?.length === 0) {
+    //         this.error = "Routes not found";
+    //       }
+    //     } catch (e) {
+    //       this.error = "Swap query request error";
+    //     } finally {
+    //       this.isFetchingSwapQuery = false;
+    //     }
+    //   }
+    // }
+    // this.swapQueryInProgress = false;
+    // // }
+  }
+
+  async setSwapQuote(response) {
     if (this.isWrapUnwrap) {
       this.allowed = true;
       const returnAmount = ethers.utils
@@ -460,111 +562,71 @@ class MultiSwapStore {
         this._getToken(this.tokenIn),
         this._getToken(this.tokenOut),
       ]);
-      // console.log('tokenIn', JSON.parse(JSON.stringify(this.tokenIn)))
-      const swapAmount = ethers.utils
-        .parseUnits(this.swapAmount, tokenIn.decimals)
-        .toString();
-      this.isFetchingSwapQuery = true;
 
-      // query old router for direct swap routes
-      if (this.isDirectRoute || this.isMultiswapInclude) {
-        const response = await stores.stableSwapStore.quoteSwap({
-          content: {
-            fromAsset: tokenIn,
-            toAsset: tokenOut,
-            fromAmount: this.swapAmount,
-          },
-        });
+      if (!response) {
+        this.swap = null;
+        this.error = "Swap query request error. Try again.";
+      }
 
-        // console.log('directSwapRoute old router response', response)
-
-        if (response === null) {
-          this.swap = null;
-          this.error = "Swap query request error. Try again.";
-        }
-
-        if (
-          response?.output?.finalValue &&
-          this.swapAmount === response.inputs.fromAmount
-        ) {
-          // console.log('_swapQuery response', response)
-          this.swap = {
-            returnAmount: response.output.receiveAmounts[1],
-            priceImpact: response.priceImpact,
-            swapAmount: response.output.receiveAmounts[0],
-            tokenAddresses: [this.tokenIn, this.tokenOut],
-            swaps: [
-              {
-                poolId:
-                  "0x421a018cc5839c4c0300afb21c725776dc389b1addddddddddddddddddddddd0",
-                assetInIndex: 0,
-                assetOutIndex: 1,
-                amount: response.output.receiveAmounts[0],
-              },
-            ],
-            quote: response,
-          };
-          this.priceInfo = this.calcPriceInfo(tokenIn, tokenOut, this.swap);
-          this.priceImpact = this.swap.priceImpact;
-        }
-
-        this.isFetchingSwapQuery = false;
-      } else {
-        try {
-          const response = await swapQuery(
-            tokenIn,
-            tokenOut,
-            swapAmount,
-            this.excludePlatforms
-          );
-          this.swap = response;
-          // console.log(this.swap)
-          this.priceInfo = this.calcPriceInfo(tokenIn, tokenOut, response);
-          this.priceImpact = this.swap.priceImpact * 100;
-          if (this.swap?.swaps?.length === 0) {
-            this.error = "Routes not found";
-          }
-        } catch (e) {
-          this.error = "Swap query request error";
-        } finally {
-          this.isFetchingSwapQuery = false;
-        }
+      if (
+        response?.output?.finalValue &&
+        this.swapAmount === response.inputs.fromAmount
+      ) {
+        // console.log('_swapQuery response', response)
+        this.swap = {
+          returnAmount: response.output.receiveAmounts[1],
+          priceImpact: response.priceImpact,
+          swapAmount: response.output.receiveAmounts[0],
+          tokenAddresses: [this.tokenIn, this.tokenOut],
+          swaps: [
+            {
+              poolId:
+                "0x421a018cc5839c4c0300afb21c725776dc389b1addddddddddddddddddddddd0",
+              assetInIndex: 0,
+              assetOutIndex: 1,
+              amount: response.output.receiveAmounts[0],
+            },
+          ],
+          quote: response,
+        };
+        this.priceInfo = this.calcPriceInfo(tokenIn, tokenOut, this.swap);
+        this.priceImpact = this.swap.priceImpact;
       }
     }
-    this.swapQueryInProgress = false;
-    // }
   }
 
   async _checkAllowance() {
-    if (this.isWrapUnwrap) {
-      this.allowed = true;
-      return true;
-    }
-
-    if (this.tokenIn === FTM_SYMBOL) {
-      this.allowed = true;
-      return true;
-    }
-
-    if (this.provider && this.isDirectRoute !== undefined) {
-      this.isFetchingAllowance = true;
-      const tokenIn = await this._getToken(this.tokenIn);
-      const response = await allowance(
-        this.tokenIn,
-        this.provider,
-        this.swapAmount,
-        tokenIn.decimals,
-        this.isDirectRoute || this.isMultiswapInclude
-          ? ROUTER_ADDRESS
-          : ROUTER_ADDRESS
-      );
-      // const response = await allowance(this.tokenIn, this.provider, this.swapAmount, tokenIn.decimals, this.isDirectRoute || this.isMultiswapInclude ? ROUTER_ADDRESS : multiSwapAddress)
-      this.allowed = response;
-      this.isFetchingAllowance = false;
-      return response;
-    }
-
-    return false;
+    // if (this.isWrapUnwrap) {
+    //   this.allowed = true;
+    //   return true;
+    // }
+    //
+    // if (this.tokenIn === FTM_SYMBOL) {
+    //   this.allowed = true;
+    //   return true;
+    // }
+    //
+    // if (this.provider && this.isDirectRoute !== undefined) {
+    //   this.isFetchingAllowance = true;
+    //   const tokenIn = await this._getToken(this.tokenIn);
+    //   const response = await allowance(
+    //     this.tokenIn,
+    //     this.provider,
+    //     this.swapAmount,
+    //     tokenIn.decimals,
+    //     this.isDirectRoute || this.isMultiswapInclude
+    //       ? ROUTER_ADDRESS
+    //       : ROUTER_ADDRESS
+    //   );
+    //   // const response = await allowance(this.tokenIn, this.provider, this.swapAmount, tokenIn.decimals, this.isDirectRoute || this.isMultiswapInclude ? ROUTER_ADDRESS : multiSwapAddress)
+    //   this.allowed = response;
+    //   this.isFetchingAllowance = false;
+    //   return response;
+    // }
+    //
+    // return false;
+    this.allowed = true;
+    return true;
   }
 
   async _fetchData() {
