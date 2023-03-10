@@ -1899,5 +1899,93 @@
         "symbol": "wstETH",
         "decimals": 18,
         "logoURI": "https://i.ibb.co/ZNgnPwj/12409.png"
+    },  
+    {
+        "chainId": 42161,
+        "address": "0xa1150db5105987CEC5Fd092273d1e3cbb22b378b",
+        "name": "Oath",
+        "symbol": "Oath",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/WfWSgKr/oath.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0x0C4681e6C0235179ec3D4F4fc4DF3d14FDD96017",
+        "name": "Radiant",
+        "symbol": "Rdnt",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/Ky9RB9z/rdmt.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a",
+        "name": "GMX",
+        "symbol": "GMX",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/jw266pw/gmUSD.pnghttps://i.ibb.co/P60VZYy/gmx.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0xEC13336bbd50790a00CDc0fEddF11287eaF92529",
+        "name": "gmUSD",
+        "symbol": "gmUSD",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/jw266pw/gmUSD.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0x93b346b6BC2548dA6A1E7d98E9a421B42541425b",
+        "name": "LUSD",
+        "symbol": "LUSD",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/WgDZWqg/lusd.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0x18c11FD286C5EC11c3b683Caa813B77f5163A122",
+        "name": "Gains Network",
+        "symbol": "GNS",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/BBzmTPv/gns.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0x079504b86d38119F859c4194765029F692b7B7aa",
+        "name": "Lyra",
+        "symbol": "Lyra",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/NCRnrdd/lyra.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0x088cd8f5eF3652623c22D48b1605DCfE860Cd704",
+        "name": "Vela",
+        "symbol": "VELA",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/RgWGXWT/vela.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0xa684cd057951541187f288294a1e1C2646aA2d24",
+        "name": "Vesta",
+        "symbol": "VSTA",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/LtGLC7H/vsta.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0xeb8E93A0c7504Bffd8A8fFa56CD754c63aAeBFe8",
+        "name": "Dai+",
+        "symbol": "Dai+",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/BGyRghz/DAI.png" 
+    },
+    {
+        "chainId": 42161,
+        "address": "0x13Ad51ed4F1B7e9Dc168d8a00cB3f4dDD85EfA60",
+        "name": "Lido",
+        "symbol": "Lido",
+        "decimals": 18,
+        "logoURI": "https://i.ibb.co/YbPpFgL/NR9xhSAq.png" 
     }
-]
+]                  
