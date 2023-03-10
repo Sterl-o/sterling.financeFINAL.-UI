@@ -1640,7 +1640,7 @@
         "name": "Wrapped Ether",
         "symbol": "WETH",
         "decimals": 18,
-        "logoURI": "https://i.ibb.co/mzZSckH/62f783f01d2fa-removebg-preview-4.png",
+        "logoURI": "https://i.ibb.co/T8zz0bX/weth.png",
         "extensions": {
             "bridgeInfo": {
                 "1": {
