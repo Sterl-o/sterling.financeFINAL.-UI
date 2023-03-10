@@ -21,7 +21,7 @@
         "name": "USDCTest",
         "symbol": "USDCT",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -29,7 +29,7 @@
         "name": "Standard Token",
         "symbol": "TST",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -37,7 +37,7 @@
         "name": "STERTest",
         "symbol": "STERT",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -53,7 +53,7 @@
         "name": "gmdUSDC",
         "symbol": "gmdUSDC",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -61,7 +61,7 @@
         "name": "Gains Network DAI",
         "symbol": "gDAI",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -69,7 +69,7 @@
         "name": "Champion",
         "symbol": "CHAM",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -77,7 +77,7 @@
         "name": "ArbRise ",
         "symbol": "AR",
         "decimals": 18,
-        "logoURI": ""
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png"
     },
     {
         "chainId": 42161,
@@ -1895,7 +1895,7 @@
         "name": "GMX",
         "symbol": "GMX",
         "decimals": 18,
-        "logoURI": "https://i.ibb.co/jw266pw/gmUSD.pnghttps://i.ibb.co/P60VZYy/gmx.png" 
+        "logoURI": "https://i.ibb.co/X3mbRFh/Pepo-Pumpkin.png" 
     },
     {
         "chainId": 42161,
